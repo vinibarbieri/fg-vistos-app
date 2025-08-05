@@ -16,7 +16,7 @@ export async function POST(request: Request) {
 
   // Agora, com o 'await' na linha acima, 'supabase' é o cliente Supabase
   // e podemos acessar a propriedade '.auth' sem erro.
-  const { data, error } = await supabase.auth.signUp({
+  const { error } = await supabase.auth.signUp({
     email,
     password,
     options: {

@@ -28,12 +28,12 @@ export function Toast({ message, type, onClose, duration = 3000 }: ToastProps) {
   };
 
   const icon = type === "success" ? (
-    <CheckCircle className="h-5 w-5 text-green-500" />
+    <CheckCircle className="h-5 w-5 text-primary" />
   ) : (
-    <XCircle className="h-5 w-5 text-red-500" />
+    <XCircle className="h-5 w-5 text-destructive" />
   );
 
-  const bgColor = type === "success" ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200";
+  const bgColor = type === "success" ? "bg-primary/10 border-primary/20" : "bg-destructive/10 border-destructive/20";
 
   return (
     <div
@@ -46,7 +46,7 @@ export function Toast({ message, type, onClose, duration = 3000 }: ToastProps) {
         <span className="text-sm font-medium">{message}</span>
         <button
           onClick={handleClose}
-          className="ml-2 text-gray-400 hover:text-gray-600 transition-colors"
+          className="ml-2 text-muted-foreground hover:text-foreground transition-colors"
         >
           <X className="h-4 w-4" />
         </button>

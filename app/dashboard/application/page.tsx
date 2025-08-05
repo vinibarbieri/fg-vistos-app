@@ -116,9 +116,9 @@ export default async function ApplicationPage() {
                   <div className="flex items-center gap-4">
                     {/* Ícone da etapa */}
                     <div className={`flex items-center justify-center w-12 h-12 rounded-full ${
-                      status === "completed" ? "bg-green-100 text-green-600" :
-                      status === "current" ? "bg-blue-100 text-blue-600" :
-                      "bg-gray-100 text-gray-400"
+                      status === "completed" ? "bg-primary/10 text-primary" :
+                      status === "current" ? "bg-secondary/10 text-secondary" :
+                      "bg-muted text-muted-foreground"
                     }`}>
                       {status === "completed" ? (
                         <CheckCircle className="h-6 w-6" />
@@ -132,12 +132,12 @@ export default async function ApplicationPage() {
                       <h3 className="font-semibold text-lg">{step.title}</h3>
                       <p className="text-muted-foreground">{step.description}</p>
                       {status === "completed" && (
-                        <span className="text-sm text-green-600 font-medium">
+                        <span className="text-sm text-primary font-medium">
                           ✓ Concluída
                         </span>
                       )}
                       {status === "current" && (
-                        <span className="text-sm text-blue-600 font-medium">
+                        <span className="text-sm text-secondary font-medium">
                           Em andamento
                         </span>
                       )}

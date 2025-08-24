@@ -1,105 +1,185 @@
-<a href="https://demo-nextjs-with-supabase.vercel.app/">
-  <img alt="Next.js and Supabase Starter Kit - the fastest way to build apps with Next.js and Supabase" src="https://demo-nextjs-with-supabase.vercel.app/opengraph-image.png">
-  <h1 align="center">Next.js and Supabase Starter Kit</h1>
-</a>
+# FG Vistos - Sistema de Gerenciamento de Vistos
 
-<p align="center">
- The fastest way to build apps with Next.js and Supabase
-</p>
+Sistema completo para gerenciamento de vistos e processos de imigração, desenvolvido com Next.js, TypeScript e Supabase.
 
-<p align="center">
-  <a href="#features"><strong>Features</strong></a> ·
-  <a href="#demo"><strong>Demo</strong></a> ·
-  <a href="#deploy-to-vercel"><strong>Deploy to Vercel</strong></a> ·
-  <a href="#clone-and-run-locally"><strong>Clone and run locally</strong></a> ·
-  <a href="#feedback-and-issues"><strong>Feedback and issues</strong></a>
-  <a href="#more-supabase-examples"><strong>More Examples</strong></a>
-</p>
-<br/>
+## 🚀 Funcionalidades
 
-## Features
+### Para Usuários Normais
+- **Dashboard Personalizado**: Visualize seus pedidos e status
+- **Formulários Inteligentes**: Preencha formulários baseados no seu plano
+- **Acompanhamento**: Acompanhe o status dos seus pedidos de visto
+- **Histórico**: Visualize histórico completo de solicitações
 
-- Works across the entire [Next.js](https://nextjs.org) stack
-  - App Router
-  - Pages Router
-  - Middleware
-  - Client
-  - Server
-  - It just works!
-- supabase-ssr. A package to configure Supabase Auth to use cookies
-- Password-based authentication block installed via the [Supabase UI Library](https://supabase.com/ui/docs/nextjs/password-based-auth)
-- Styling with [Tailwind CSS](https://tailwindcss.com)
-- Components with [shadcn/ui](https://ui.shadcn.com/)
-- Optional deployment with [Supabase Vercel Integration and Vercel deploy](#deploy-your-own)
-  - Environment variables automatically assigned to Vercel project
+### Para Funcionários
+- **Gestão Completa**: Gerencie pedidos, candidatos, planos e formulários
+- **Controle de Status**: Atualize status de pedidos e candidatos
+- **Criação de Formulários**: Crie formulários personalizados para cada plano
+- **Gestão de Planos**: Crie, edite e gerencie planos de visto
+- **Administração de Candidatos**: Adicione e gerencie candidatos aos pedidos
 
-## Demo
+## 🛠️ Tecnologias Utilizadas
 
-You can view a fully working demo at [demo-nextjs-with-supabase.vercel.app](https://demo-nextjs-with-supabase.vercel.app/).
+- **Frontend**: Next.js 14, TypeScript, Tailwind CSS
+- **Backend**: Supabase (PostgreSQL, Auth, Real-time)
+- **UI Components**: Shadcn/ui
+- **Estado**: React Hooks
+- **Autenticação**: Supabase Auth
 
-## Deploy to Vercel
+## 📁 Estrutura do Projeto
 
-Vercel deployment will guide you through creating a Supabase account and project.
+```
+fg-vistos-app/
+├── app/                    # App Router do Next.js
+│   ├── api/               # APIs REST
+│   ├── auth/              # Páginas de autenticação
+│   ├── dashboard/         # Dashboard principal
+│   └── protected/         # Rotas protegidas
+├── components/            # Componentes React
+│   ├── ui/               # Componentes de UI base
+│   ├── auth-guard.tsx    # Guarda de autenticação
+│   ├── dashboard-nav.tsx # Navegação do dashboard
+│   ├── user-dashboard.tsx # Dashboard para usuários
+│   ├── employee-dashboard.tsx # Dashboard para funcionários
+│   ├── form-manager.tsx  # Gerenciador de formulários
+│   ├── applicant-manager.tsx # Gerenciador de candidatos
+│   ├── plan-manager.tsx  # Gerenciador de planos
+│   └── order-manager.tsx # Gerenciador de pedidos
+├── lib/                  # Utilitários e configurações
+│   └── supabase/        # Cliente e configurações do Supabase
+└── public/              # Arquivos estáticos
+```
 
-After installation of the Supabase integration, all relevant environment variables will be assigned to the project so the deployment is fully functioning.
+## 🚀 Como Executar
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&project-name=nextjs-with-supabase&repository-name=nextjs-with-supabase&demo-title=nextjs-with-supabase&demo-description=This+starter+configures+Supabase+Auth+to+use+cookies%2C+making+the+user%27s+session+available+throughout+the+entire+Next.js+app+-+Client+Components%2C+Server+Components%2C+Route+Handlers%2C+Server+Actions+and+Middleware.&demo-url=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2F&external-id=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&demo-image=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2Fopengraph-image.png)
+### Pré-requisitos
+- Node.js 18+ 
+- npm ou yarn
+- Conta no Supabase
 
-The above will also clone the Starter kit to your GitHub, you can clone that locally and develop locally.
+### 1. Clone o repositório
+```bash
+git clone <url-do-repositorio>
+cd fg-vistos-app
+```
 
-If you wish to just develop locally and not deploy to Vercel, [follow the steps below](#clone-and-run-locally).
+### 2. Instale as dependências
+```bash
+npm install
+```
 
-## Clone and run locally
+### 3. Configure as variáveis de ambiente
+Crie um arquivo `.env.local` na raiz do projeto:
 
-1. You'll first need a Supabase project which can be made [via the Supabase dashboard](https://database.new)
+```env
+NEXT_PUBLIC_SUPABASE_URL=sua_url_do_supabase
+NEXT_PUBLIC_SUPABASE_ANON_KEY=sua_chave_anonima_do_supabase
+```
 
-2. Create a Next.js app using the Supabase Starter template npx command
+### 4. Execute o projeto
+```bash
+npm run dev
+```
 
-   ```bash
-   npx create-next-app --example with-supabase with-supabase-app
-   ```
+O projeto estará disponível em `http://localhost:3000`
 
-   ```bash
-   yarn create next-app --example with-supabase with-supabase-app
-   ```
+## 🗄️ Estrutura do Banco de Dados
 
-   ```bash
-   pnpm create next-app --example with-supabase with-supabase-app
-   ```
+### Tabelas Principais
 
-3. Use `cd` to change into the app's directory
+#### `profiles`
+- `id`: UUID (referência ao usuário)
+- `role`: ENUM ('user', 'employee')
+- `email`: TEXT
 
-   ```bash
-   cd with-supabase-app
-   ```
+#### `plans`
+- `id`: UUID
+- `plan_name`: TEXT
+- `description`: TEXT
+- `price`: DECIMAL
+- `active`: BOOLEAN
+- `visa_type_id`: UUID (referência a visa_types)
 
-4. Rename `.env.example` to `.env.local` and update the following:
+#### `orders`
+- `id`: UUID
+- `responsible_user_id`: UUID (referência a profiles)
+- `applicants_quantity`: INTEGER
+- `plan_id`: UUID (referência a plans)
+- `status`: ENUM ('pending', 'processing', 'approved', 'rejected')
+- `payment_details`: JSONB
+- `created_at`: TIMESTAMP
 
-   ```
-   NEXT_PUBLIC_SUPABASE_URL=[INSERT SUPABASE PROJECT URL]
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=[INSERT SUPABASE PROJECT API ANON KEY]
-   ```
+#### `applicants`
+- `id`: UUID
+- `name`: TEXT
+- `email`: TEXT
+- `order_id`: UUID (referência a orders)
+- `status`: ENUM ('pending', 'processing', 'approved', 'rejected')
+- `created_at`: TIMESTAMP
 
-   Both `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` can be found in [your Supabase project's API settings](https://supabase.com/dashboard/project/_?showConnect=true)
+#### `form_questions`
+- `id`: UUID
+- `plan_id`: UUID (referência a plans)
+- `questions`: JSONB (estrutura das perguntas)
 
-5. You can now run the Next.js local development server:
+## 🔐 Sistema de Autenticação
 
-   ```bash
-   npm run dev
-   ```
+O sistema utiliza Supabase Auth com dois tipos de usuários:
 
-   The starter kit should now be running on [localhost:3000](http://localhost:3000/).
+1. **Usuários Normais** (`role: 'user'`)
+   - Acesso limitado ao próprio dashboard
+   - Visualização de pedidos pessoais
+   - Preenchimento de formulários
 
-6. This template comes with the default shadcn/ui style initialized. If you instead want other ui.shadcn styles, delete `components.json` and [re-install shadcn/ui](https://ui.shadcn.com/docs/installation/next)
+2. **Funcionários** (`role: 'employee'`)
+   - Acesso completo ao sistema
+   - Gestão de todos os pedidos
+   - Administração de candidatos, planos e formulários
 
-> Check out [the docs for Local Development](https://supabase.com/docs/guides/getting-started/local-development) to also run Supabase locally.
+## 📱 Interface do Usuário
 
-## Feedback and issues
+### Dashboard do Usuário
+- Visualização de pedidos pessoais
+- Status em tempo real
+- Acesso a formulários baseados no plano
+- Histórico de solicitações
 
-Please file feedback and issues over on the [Supabase GitHub org](https://github.com/supabase/supabase/issues/new/choose).
+### Dashboard do Funcionário
+- **Aba Pedidos**: Gestão completa de pedidos
+- **Aba Candidatos**: Administração de candidatos
+- **Aba Planos**: Criação e edição de planos
+- **Aba Formulários**: Gerenciamento de formulários
 
-## More Supabase examples
+## 🔧 Desenvolvimento
 
-- [Next.js Subscription Payments Starter](https://github.com/vercel/nextjs-subscription-payments)
-- [Cookie-based Auth and the Next.js 13 App Router (free course)](https://youtube.com/playlist?list=PL5S4mPUpp4OtMhpnp93EFSo42iQ40XjbF)
-- [Supabase Auth and the Next.js App Router](https://github.com/supabase/supabase/tree/master/examples/auth/nextjs)
+### Adicionando Novos Componentes
+1. Crie o componente na pasta `components/`
+2. Importe no componente pai
+3. Adicione as funcionalidades necessárias
+
+### Modificando APIs
+1. Edite os arquivos em `app/api/`
+2. Mantenha a estrutura REST
+3. Use o cliente Supabase para operações no banco
+
+### Estilização
+- Use Tailwind CSS para estilos
+- Componentes base em `components/ui/`
+- Mantenha consistência visual
+
+## 📝 Licença
+
+Este projeto está sob a licença MIT.
+
+## 🤝 Contribuição
+
+1. Fork o projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
+
+## 📞 Suporte
+
+Para suporte, entre em contato através de:
+- Email: [seu-email@exemplo.com]
+- Issues do GitHub: [link-do-repositorio/issues]

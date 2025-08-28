@@ -14,7 +14,7 @@ export default function Home() {
         <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16">
           <div className="w-full max-w-5xl flex justify-between items-center p-3 px-5 text-sm">
             <div className="flex gap-5 items-center font-semibold">
-              <Link href={"/"}>Next.js Supabase Starter</Link>
+              <Link href={"/"}>FG Vistos</Link>
               <div className="flex items-center gap-2">
                 <DeployButton />
               </div>
@@ -25,8 +25,33 @@ export default function Home() {
         <div className="flex-1 flex flex-col gap-20 max-w-5xl p-5">
           <Hero />
           <main className="flex-1 flex flex-col gap-6 px-4">
-            <h2 className="font-medium text-xl mb-4">Next steps</h2>
-            {hasEnvVars ? <SignUpUserSteps /> : <ConnectSupabaseSteps />}
+            <h2 className="font-medium text-xl mb-4">Sistema de Vistos</h2>
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="p-6 border rounded-lg">
+                <h3 className="text-lg font-semibold mb-2">Para Usuários</h3>
+                <p className="text-muted-foreground mb-4">
+                  Acesse seus pedidos e preencha formulários baseados no seu plano.
+                </p>
+                <Link 
+                  href="/auth/login" 
+                  className="inline-block bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90"
+                >
+                  Fazer Login
+                </Link>
+              </div>
+              <div className="p-6 border rounded-lg">
+                <h3 className="text-lg font-semibold mb-2">Para Funcionários</h3>
+                <p className="text-muted-foreground mb-4">
+                  Gerencie pedidos, candidatos e planos do sistema.
+                </p>
+                <Link 
+                  href="/auth/login" 
+                  className="inline-block bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90"
+                >
+                  Acessar Sistema
+                </Link>
+              </div>
+            </div>
           </main>
         </div>
 

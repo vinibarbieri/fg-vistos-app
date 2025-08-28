@@ -1,6 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
 // Vamos usar o `updateSession` que você já tem, pois ele lida com os cookies.
-import { updateSession } from "@/lib/supabase/middleware";
 import { createClient } from "@/lib/supabase/server";
 
 export async function POST(request: NextRequest) {

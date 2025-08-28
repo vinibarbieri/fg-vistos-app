@@ -6,14 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { User, Plus, Edit2, Check, X } from "lucide-react";
+import { User, Edit2, Check, X } from "lucide-react";
 import { Person } from "@/types/process";
 
 interface VisaApplicationsProps {
   people: Person[];
   onEditName: (personId: string, newName: string) => void;
   onFillForm: (personId: string) => void;
-  onAddPerson: () => void;
 }
 
 interface EditableNameProps {
@@ -89,8 +88,7 @@ function EditableName({ person, onSave }: EditableNameProps) {
 export function VisaApplications({
   people,
   onEditName,
-  onFillForm,
-  onAddPerson
+  onFillForm
 }: VisaApplicationsProps) {
 
   const getStatusText = (progress: number) => {
@@ -108,7 +106,7 @@ export function VisaApplications({
           Minhas Aplicações de Visto
         </CardTitle>
         <CardDescription>
-          Gerencie os formulários de cada pessoa
+          Acompanhe o progresso dos formulários de cada aplicante
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -154,20 +152,16 @@ export function VisaApplications({
             ))}
           </div>
 
-          {/* Mensagem quando não há pessoas */}
+          {/* Mensagem quando não há aplicações */}
           {people.length === 0 && (
             <div className="text-center py-8">
               <User className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-medium text-muted-foreground mb-2">
-                Nenhuma pessoa adicionada
+                Nenhuma aplicação encontrada
               </h3>
-              <p className="text-muted-foreground mb-4">
-                Comece adicionando pessoas para gerenciar seus formulários de visto
+              <p className="text-muted-foreground">
+                Você ainda não possui aplicações de visto registradas no sistema.
               </p>
-              <Button onClick={onAddPerson}>
-                <Plus className="h-4 w-4 mr-2" />
-                Adicionar Primeira Pessoa
-              </Button>
             </div>
           )}
         </div>

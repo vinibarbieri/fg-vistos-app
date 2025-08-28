@@ -1,234 +1,271 @@
-import { Person } from "@/types/process";
+import { createClient } from "@/lib/supabase/client";
+import { ApplicantT } from "@/types/ApplicantT";
+import { UserT } from "@/types/UserT";
 
 // ============================================================================
-// FUNÇÕES DO BACKEND - DESATIVADAS POR ENQUANTO
+// FUNÇÕES DO BACKEND - INTEGRADAS COM SUPABASE
 // ============================================================================
 
-/*
-// Buscar pessoas do responsável
-export async function getResponsiblePeople(responsibleId: string): Promise<Person[]> {
-  const supabase = await createClient();
-  
-  const { data, error } = await supabase
-    .from('people')
-    .select('*')
-    .eq('responsible_id', responsibleId)
-    .order('created_at', { ascending: true });
+// Buscar dados do responsável (profiles)
+export async function getResponsibleData(userId: string): Promise<{ name: string; email: string } | null> {
+  try {
+    const supabase = createClient();
     
-  if (error) {
-    console.error('Erro ao buscar pessoas:', error);
-    return [];
-  }
-  
-  return data || [];
-}
-
-// Adicionar nova pessoa
-export async function addPerson(responsibleId: string): Promise<Person | null> {
-  const supabase = await createClient();
-  
-  // Contar pessoas existentes para gerar nome padrão
-  const { count } = await supabase
-    .from('people')
-    .select('*', { count: 'exact', head: true })
-    .eq('responsible_id', responsibleId);
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('name, email')
+      .eq('id', userId)
+      .single();
+      
+    if (error) {
+      console.error('Erro ao buscar dados do responsável:', error);
+      return null;
+    }
     
-  const personNumber = (count || 0) + 1;
-  const defaultName = `Pessoa ${personNumber}`;
-  
-  const { data, error } = await supabase
-    .from('people')
-    .insert({
-      responsible_id: responsibleId,
-      name: defaultName,
-      progress: 0,
-      status: 'not_started'
-    })
-    .select()
-    .single();
-    
-  if (error) {
-    console.error('Erro ao adicionar pessoa:', error);
+    return {
+      name: data.name,
+      email: data.email
+    };
+  } catch (error) {
+    console.error('Erro ao buscar dados do responsável:', error);
     return null;
   }
-  
-  return data;
 }
 
-// Atualizar nome da pessoa
-export async function updatePersonName(personId: string, newName: string): Promise<boolean> {
-  const supabase = await createClient();
-  
-  const { error } = await supabase
-    .from('people')
-    .update({
-      name: newName,
-      updated_at: new Date().toISOString()
-    })
-    .eq('id', personId);
+// Buscar todas as aplicações onde o usuário é responsável
+export async function getResponsibleApplications(userId: string): Promise<ApplicantT[]> {
+  try {
+    const supabase = createClient();
     
-  if (error) {
-    console.error('Erro ao atualizar nome:', error);
+    const { data, error } = await supabase
+      .from('applicants')
+      .select('*')
+      .eq('resposible_user_id', userId)
+      .order('created_at', { ascending: true });
+      
+    if (error) {
+      console.error('Erro ao buscar aplicações:', error);
+      return [];
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error('Erro ao buscar aplicações:', error);
+    return [];
+  }
+}
+
+// Buscar dados de um aplicante específico
+export async function getApplicantData(applicantId: string): Promise<ApplicantT | null> {
+  try {
+    const supabase = createClient();
+    
+    const { data, error } = await supabase
+      .from('applicants')
+      .select('*')
+      .eq('id', applicantId)
+      .single();
+      
+    if (error) {
+      console.error('Erro ao buscar dados do aplicante:', error);
+      return null;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Erro ao buscar dados do aplicante:', error);
+    return null;
+  }
+}
+
+// Adicionar novo aplicante
+export async function addApplicant(responsibleId: string, orderId: string): Promise<ApplicantT | null> {
+  try {
+    const supabase = createClient();
+    
+    // Contar aplicantes existentes para gerar nome padrão
+    const { count } = await supabase
+      .from('applicants')
+      .select('*', { count: 'exact', head: true })
+      .eq('resposible_user_id', responsibleId);
+      
+    const applicantNumber = (count || 0) + 1;
+    const defaultName = `Aplicante ${applicantNumber}`;
+    
+    const { data, error } = await supabase
+      .from('applicants')
+      .insert({
+        resposible_user_id: responsibleId,
+        order_id: orderId,
+        is_responsible: false,
+        name: defaultName,
+        status: 'pending',
+        form_status: 'not_started',
+        from_answer: '',
+        attachment_id: null
+      })
+      .select()
+      .single();
+      
+    if (error) {
+      console.error('Erro ao adicionar aplicante:', error);
+      return null;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Erro ao adicionar aplicante:', error);
+    return null;
+  }
+}
+
+// Atualizar nome do aplicante
+export async function updateApplicantName(applicantId: string, newName: string): Promise<boolean> {
+  try {
+    const supabase = createClient();
+    
+    const { error } = await supabase
+      .from('applicants')
+      .update({
+        name: newName,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', applicantId);
+      
+    if (error) {
+      console.error('Erro ao atualizar nome do aplicante:', error);
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Erro ao atualizar nome do aplicante:', error);
     return false;
   }
-  
-  return true;
 }
 
-// Atualizar progresso da pessoa
-export async function updatePersonProgress(personId: string, progress: number): Promise<boolean> {
-  const supabase = await createClient();
-  
-  const status = progress === 0 ? 'not_started' : 
-                 progress < 100 ? 'in_progress' : 'completed';
-  
-  const { error } = await supabase
-    .from('people')
-    .update({
-      progress,
-      status,
-      updated_at: new Date().toISOString()
-    })
-    .eq('id', personId);
+// Atualizar status do formulário do aplicante
+export async function updateApplicantFormStatus(applicantId: string, formStatus: string): Promise<boolean> {
+  try {
+    const supabase = createClient();
     
-  if (error) {
-    console.error('Erro ao atualizar progresso:', error);
+    const { error } = await supabase
+      .from('applicants')
+      .update({
+        form_status: formStatus,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', applicantId);
+      
+    if (error) {
+      console.error('Erro ao atualizar status do formulário:', error);
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Erro ao atualizar status do formulário:', error);
     return false;
   }
-  
-  return true;
 }
-*/
 
-// ============================================================================
-// DADOS MOCKADOS PARA TESTE DO FRONTEND
-// ============================================================================
-
-// Dados mockados das pessoas
-let mockPeople: Person[] = [
-  {
-    id: "person-1",
-    name: "Pessoa 1",
-    progress: 80,
-    status: "in_progress",
-    formData: {},
-    created_at: "2024-01-15T10:00:00Z",
-    updated_at: "2024-01-15T14:30:00Z"
-  },
-  {
-    id: "person-2",
-    name: "Pessoa 2",
-    progress: 40,
-    status: "in_progress",
-    formData: {},
-    created_at: "2024-01-15T11:00:00Z",
-    updated_at: "2024-01-15T15:00:00Z"
-  },
-  {
-    id: "person-3",
-    name: "Pessoa 3",
-    progress: 0,
-    status: "not_started",
-    formData: {},
-    created_at: "2024-01-15T12:00:00Z",
-    updated_at: "2024-01-15T12:00:00Z"
+// Atualizar status geral do aplicante
+export async function updateApplicantStatus(applicantId: string, status: string): Promise<boolean> {
+  try {
+    const supabase = createClient();
+    
+    const { error } = await supabase
+      .from('applicants')
+      .update({
+        status: status,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', applicantId);
+      
+    if (error) {
+      console.error('Erro ao atualizar status do aplicante:', error);
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Erro ao atualizar status do aplicante:', error);
+    return false;
   }
-];
-
-// Funções mockadas que simulam o comportamento do backend
-export async function getResponsiblePeople(responsibleId: string): Promise<Person[]> {
-  // Simular delay de rede
-  await new Promise(resolve => setTimeout(resolve, 300));
-  
-  // Retornar dados mockados
-  return mockPeople;
-}
-
-export async function addPerson(responsibleId: string): Promise<Person | null> {
-  // Simular delay de rede
-  await new Promise(resolve => setTimeout(resolve, 500));
-  
-  // Gerar novo ID e nome
-  const personNumber = mockPeople.length + 1;
-  const newPerson: Person = {
-    id: `person-${Date.now()}`,
-    name: `Pessoa ${personNumber}`,
-    progress: 0,
-    status: "not_started",
-    formData: {},
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  };
-  
-  // Adicionar à lista mockada
-  mockPeople.push(newPerson);
-  
-  console.log(`[MOCK] Nova pessoa adicionada: ${newPerson.name}`);
-  return newPerson;
-}
-
-export async function updatePersonName(personId: string, newName: string): Promise<boolean> {
-  // Simular delay de rede
-  await new Promise(resolve => setTimeout(resolve, 400));
-  
-  // Encontrar e atualizar pessoa
-  const personIndex = mockPeople.findIndex(p => p.id === personId);
-  if (personIndex === -1) return false;
-  
-  mockPeople[personIndex] = {
-    ...mockPeople[personIndex],
-    name: newName,
-    updated_at: new Date().toISOString()
-  };
-  
-  console.log(`[MOCK] Nome atualizado para: ${newName}`);
-  return true;
-}
-
-export async function updatePersonProgress(personId: string, progress: number): Promise<boolean> {
-  // Simular delay de rede
-  await new Promise(resolve => setTimeout(resolve, 300));
-  
-  // Encontrar e atualizar pessoa
-  const personIndex = mockPeople.findIndex(p => p.id === personId);
-  if (personIndex === -1) return false;
-  
-  const status = progress === 0 ? 'not_started' : 
-                 progress < 100 ? 'in_progress' : 'completed';
-  
-  mockPeople[personIndex] = {
-    ...mockPeople[personIndex],
-    progress,
-    status,
-    updated_at: new Date().toISOString()
-  };
-  
-  console.log(`[MOCK] Progresso atualizado para: ${progress}%`);
-  return true;
 }
 
 // ============================================================================
 // FUNÇÕES UTILITÁRIAS
 // ============================================================================
 
-// Gerar nome padrão para nova pessoa
-export function generateDefaultName(people: Person[]): string {
-  const personNumber = people.length + 1;
-  return `Pessoa ${personNumber}`;
+// Gerar nome padrão para novo aplicante
+export function generateDefaultName(applicants: ApplicantT[]): string {
+  const applicantNumber = applicants.length + 1;
+  return `Aplicante ${applicantNumber}`;
 }
 
 // Verificar se nome já existe
-export function isNameTaken(people: Person[], name: string, excludeId?: string): boolean {
-  return people.some(person => 
-    person.name.toLowerCase() === name.toLowerCase() && 
-    person.id !== excludeId
+export function isNameTaken(applicants: ApplicantT[], name: string, excludeId?: string): boolean {
+  return applicants.some(applicant => 
+    applicant.name.toLowerCase() === name.toLowerCase() && 
+    applicant.id !== excludeId
   );
 }
 
-// Calcular progresso médio de todas as pessoas
-export function calculateAverageProgress(people: Person[]): number {
-  if (people.length === 0) return 0;
+// Calcular progresso médio baseado no form_status
+export function calculateAverageProgress(applicants: ApplicantT[]): number {
+  if (applicants.length === 0) return 0;
   
-  const totalProgress = people.reduce((sum, person) => sum + person.progress, 0);
-  return Math.round(totalProgress / people.length);
+  const progressMap: Record<string, number> = {
+    'not_started': 0,
+    'in_progress': 50,
+    'completed': 100
+  };
+  
+  const totalProgress = applicants.reduce((sum, applicant) => {
+    return sum + (progressMap[applicant.form_status] || 0);
+  }, 0);
+  
+  return Math.round(totalProgress / applicants.length);
+}
+
+// Mapear form_status para progresso numérico
+export function getFormStatusProgress(formStatus: string): number {
+  const progressMap: Record<string, number> = {
+    'not_started': 0,
+    'in_progress': 50,
+    'completed': 100
+  };
+  
+  return progressMap[formStatus] || 0;
+}
+
+// Obter informações do status do formulário
+export function getFormStatusInfo(formStatus: string) {
+  switch (formStatus) {
+    case "not_started":
+      return { 
+        label: "Não Iniciado", 
+        color: "bg-gray-500", 
+        description: "Formulário ainda não foi preenchido" 
+      };
+    case "in_progress":
+      return { 
+        label: "Em Andamento", 
+        color: "bg-blue-500", 
+        description: "Formulário sendo preenchido" 
+      };
+    case "completed":
+      return { 
+        label: "Completo", 
+        color: "bg-green-500", 
+        description: "Formulário totalmente preenchido" 
+      };
+    default:
+      return { 
+        label: "Não Iniciado", 
+        color: "bg-gray-500", 
+        description: "Status não definido" 
+      };
+  }
 } 

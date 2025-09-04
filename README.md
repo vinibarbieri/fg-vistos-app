@@ -36,14 +36,6 @@ fg-vistos-app/
 │   └── protected/         # Rotas protegidas
 ├── components/            # Componentes React
 │   ├── ui/               # Componentes de UI base
-│   ├── auth-guard.tsx    # Guarda de autenticação
-│   ├── dashboard-nav.tsx # Navegação do dashboard
-│   ├── user-dashboard.tsx # Dashboard para usuários
-│   ├── employee-dashboard.tsx # Dashboard para funcionários
-│   ├── form-manager.tsx  # Gerenciador de formulários
-│   ├── applicant-manager.tsx # Gerenciador de candidatos
-│   ├── plan-manager.tsx  # Gerenciador de planos
-│   └── order-manager.tsx # Gerenciador de pedidos
 ├── lib/                  # Utilitários e configurações
 │   └── supabase/        # Cliente e configurações do Supabase
 └── public/              # Arquivos estáticos
@@ -82,45 +74,6 @@ npm run dev
 
 O projeto estará disponível em `http://localhost:3000`
 
-## 🗄️ Estrutura do Banco de Dados
-
-### Tabelas Principais
-
-#### `profiles`
-- `id`: UUID (referência ao usuário)
-- `role`: ENUM ('user', 'employee')
-- `email`: TEXT
-
-#### `plans`
-- `id`: UUID
-- `plan_name`: TEXT
-- `description`: TEXT
-- `price`: DECIMAL
-- `active`: BOOLEAN
-- `visa_type_id`: UUID (referência a visa_types)
-
-#### `orders`
-- `id`: UUID
-- `responsible_user_id`: UUID (referência a profiles)
-- `applicants_quantity`: INTEGER
-- `plan_id`: UUID (referência a plans)
-- `status`: ENUM ('pending', 'processing', 'approved', 'rejected')
-- `payment_details`: JSONB
-- `created_at`: TIMESTAMP
-
-#### `applicants`
-- `id`: UUID
-- `name`: TEXT
-- `email`: TEXT
-- `order_id`: UUID (referência a orders)
-- `status`: ENUM ('pending', 'processing', 'approved', 'rejected')
-- `created_at`: TIMESTAMP
-
-#### `form_questions`
-- `id`: UUID
-- `plan_id`: UUID (referência a plans)
-- `questions`: JSONB (estrutura das perguntas)
-
 ## 🔐 Sistema de Autenticação
 
 O sistema utiliza Supabase Auth com dois tipos de usuários:
@@ -149,37 +102,8 @@ O sistema utiliza Supabase Auth com dois tipos de usuários:
 - **Aba Planos**: Criação e edição de planos
 - **Aba Formulários**: Gerenciamento de formulários
 
-## 🔧 Desenvolvimento
 
-### Adicionando Novos Componentes
-1. Crie o componente na pasta `components/`
-2. Importe no componente pai
-3. Adicione as funcionalidades necessárias
+## 📞 Contato
 
-### Modificando APIs
-1. Edite os arquivos em `app/api/`
-2. Mantenha a estrutura REST
-3. Use o cliente Supabase para operações no banco
-
-### Estilização
-- Use Tailwind CSS para estilos
-- Componentes base em `components/ui/`
-- Mantenha consistência visual
-
-## 📝 Licença
-
-Este projeto está sob a licença MIT.
-
-## 🤝 Contribuição
-
-1. Fork o projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
-
-## 📞 Suporte
-
-Para suporte, entre em contato através de:
-- Email: [seu-email@exemplo.com]
-- Issues do GitHub: [link-do-repositorio/issues]
+Entre em contato através de:
+- Email: [vinibarbieri.dev@gmail.com]

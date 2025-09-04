@@ -1,4 +1,6 @@
 {
+  "name": "fg-vistos-app",
+  "description": "Sistema completo de gerenciamento de vistos e processos de imigração desenvolvido com Next.js, TypeScript e Supabase",
   "private": true,
   "scripts": {
     "dev": "next dev",

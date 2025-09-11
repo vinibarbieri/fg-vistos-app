@@ -4,18 +4,18 @@ Sistema completo para gerenciamento de vistos e processos de imigração, desenv
 
 ## 🚀 Funcionalidades
 
-### Para Usuários Normais
+### Para Usuários Clientes
 - **Dashboard Personalizado**: Visualize seus pedidos e status
 - **Formulários Inteligentes**: Preencha formulários baseados no seu plano
 - **Acompanhamento**: Acompanhe o status dos seus pedidos de visto
 - **Histórico**: Visualize histórico completo de solicitações
 
 ### Para Funcionários
-- **Gestão Completa**: Gerencie pedidos, candidatos, planos e formulários
-- **Controle de Status**: Atualize status de pedidos e candidatos
+- **Gestão Completa**: Gerencie pedidos, clientes, planos e formulários
+- **Controle de Status**: Atualize status de pedidos e clientes
 - **Criação de Formulários**: Crie formulários personalizados para cada plano
 - **Gestão de Planos**: Crie, edite e gerencie planos de visto
-- **Administração de Candidatos**: Adicione e gerencie candidatos aos pedidos
+- **Administração de clientes**: Adicione e gerencie clientes aos pedidos
 
 ## 🛠️ Tecnologias Utilizadas
 

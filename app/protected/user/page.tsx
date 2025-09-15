@@ -6,18 +6,15 @@ import { VisaApplications } from "@/components/visa-applications";
 import { DEFAULT_PROCESS_STEPS, ProcessStep } from "@/types/process";
 import { ApplicantT } from "@/types/ApplicantT";
 import { 
-  getResponsibleData, 
-  getResponsibleApplications, 
-  updateApplicantName,
+  getResponsibleDataAPI, 
+  getResponsibleApplicationsAPI, 
+  updateApplicantNameAPI,
   getFormStatusProgress,
   getFormStatusInfo
-} from "@/lib/responsible";
+} from "@/lib/api/responsible-api";
 import { 
-  getProcessStatus, 
-  getProcessDetails,
-  getProcessStatusInfo,
-  calculateProgressFromStatus
-} from "@/lib/process";
+  getProcessStatusAPI
+} from "@/lib/api/responsible-api";
 import { useAuth } from "@/lib/hooks/useAuth";
 
 export default function ResponsiblePage() {
@@ -39,15 +36,15 @@ export default function ResponsiblePage() {
         setIsLoading(true);
 
         // Buscar dados do responsável
-        const responsible = await getResponsibleData(userId);
+        const responsible = await getResponsibleDataAPI(userId);
         setResponsibleData(responsible);
 
         // Buscar aplicações do responsável
-        const applications = await getResponsibleApplications(userId);
+        const applications = await getResponsibleApplicationsAPI(userId);
         setApplicants(applications);
 
         // Buscar status do processo
-        const status = await getProcessStatus(userId);
+        const status = await getProcessStatusAPI(userId);
         setProcessStatus(status);
 
         // Atualizar passos do processo baseado no status
@@ -95,7 +92,7 @@ export default function ResponsiblePage() {
 
   const handleEditPersonName = async (personId: string, newName: string) => {
     try {
-      const success = await updateApplicantName(personId, newName);
+      const success = await updateApplicantNameAPI(personId, newName);
       if (success) {
         setApplicants(prev => 
           prev.map(applicant => 

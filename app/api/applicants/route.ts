@@ -1,13 +1,58 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { checkUserRole } from "../utils/role-check";
 
 export async function GET(request: Request) {
   try {
     const supabase = await createClient();
-    const { data: applicants, error } = await supabase
-      .from("applicants")
-      .select("*");
-
+    
+    // Verificar autenticação
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    
+    if (authError || !user) {
+      return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
+    }
+    
+    // Verificar role do usuário
+    const roleCheck = await checkUserRole(user.id);
+    
+    if (!roleCheck.hasAccess || !roleCheck.role) {
+      return NextResponse.json({ 
+        error: roleCheck.error || "Acesso negado." 
+      }, { status: 403 });
+    }
+    
+    // Extrair query parameters da URL
+    const { searchParams } = new URL(request.url);
+    const responsibleUserId = searchParams.get('responsible_user_id');
+    
+    let query = supabase.from("applicants").select("*");
+    
+    // CONTROLE DE ACESSO BASEADO NO ROLE
+    if (roleCheck.role === "Cliente") {
+      // Cliente: só pode ver seus próprios applicants
+      if (!responsibleUserId || responsibleUserId !== user.id) {
+        return NextResponse.json({ 
+          error: "Acesso negado. Clientes só podem ver seus próprios applicants." 
+        }, { status: 403 });
+      }
+      query = query.eq('responsible_user_id', user.id);
+      
+    } else if (roleCheck.role === "Admin" || roleCheck.role === "Funcionario") {
+      // Admin/Funcionario: pode ver todos ou filtrar por usuário específico
+      if (responsibleUserId) {
+        query = query.eq('responsible_user_id', responsibleUserId);
+      }
+      // Se não especificar responsible_user_id, retorna todos
+      
+    } else {
+      return NextResponse.json({ 
+        error: "Role não reconhecido." 
+      }, { status: 403 });
+    }
+    
+    const { data: applicants, error } = await query;
+    
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }

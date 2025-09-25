@@ -7,4 +7,5 @@ export type VisaTypeT = {
     country: string;
     visa_type: string;
     active: boolean;
+    country_key: string;
 }

@@ -1,6 +1,6 @@
 import { AttachmentsT } from "./Attachments";
 import { OrderT } from "./OrderT";
-import { UserT } from "./UserT";
+import { UserT } from "./ProfilesT";
 
 export type ApplicantT = {
     id: string;

@@ -106,7 +106,7 @@ O projeto estará disponível em `http://localhost:3000`
 
 ```sql
 INSERT INTO profiles (id, role, email)
-VALUES ('id-do-usuario-criado', 'employee', 'email@exemplo.com');
+VALUES ('id-do-usuario-criado', 'funcionario', 'email@exemplo.com');
 ```
 
 ## 🔧 4. Configurações Adicionais

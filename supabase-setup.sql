@@ -5,7 +5,7 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Criar tipos ENUM
-CREATE TYPE user_role AS ENUM ('user', 'employee');
+CREATE TYPE user_role AS ENUM ('user', 'funcionario');
 CREATE TYPE order_status AS ENUM ('pending', 'processing', 'approved', 'rejected');
 
 -- Tabela de tipos de visto
@@ -154,12 +154,12 @@ CREATE POLICY "Anyone can view active plans" ON plans
     FOR SELECT USING (active = true);
 
 -- Política para plans: apenas funcionários podem gerenciar
-CREATE POLICY "Employees can manage plans" ON plans
+CREATE POLICY "Funcionarios can manage plans" ON plans
     FOR ALL USING (
         EXISTS (
             SELECT 1 FROM profiles 
             WHERE profiles.id = auth.uid() 
-            AND profiles.role = 'employee'
+            AND profiles.role = 'funcionario'
         )
     );
 
@@ -168,42 +168,42 @@ CREATE POLICY "Users can view own orders" ON orders
     FOR SELECT USING (responsible_user_id = auth.uid());
 
 -- Política para orders: funcionários podem ver todos os pedidos
-CREATE POLICY "Employees can view all orders" ON orders
+CREATE POLICY "Funcionarios can view all orders" ON orders
     FOR SELECT USING (
         EXISTS (
             SELECT 1 FROM profiles 
             WHERE profiles.id = auth.uid() 
-            AND profiles.role = 'employee'
+            AND profiles.role = 'funcionario'
         )
     );
 
 -- Política para orders: funcionários podem gerenciar todos os pedidos
-CREATE POLICY "Employees can manage all orders" ON orders
+CREATE POLICY "Funcionarios can manage all orders" ON orders
     FOR ALL USING (
         EXISTS (
             SELECT 1 FROM profiles 
             WHERE profiles.id = auth.uid() 
-            AND profiles.role = 'employee'
+            AND profiles.role = 'funcionario'
         )
     );
 
 -- Política para applicants: funcionários podem ver todos os candidatos
-CREATE POLICY "Employees can view all applicants" ON applicants
+CREATE POLICY "Funcionarios can view all applicants" ON applicants
     FOR SELECT USING (
         EXISTS (
             SELECT 1 FROM profiles 
             WHERE profiles.id = auth.uid() 
-            AND profiles.role = 'employee'
+            AND profiles.role = 'funcionario'
         )
     );
 
 -- Política para applicants: funcionários podem gerenciar todos os candidatos
-CREATE POLICY "Employees can manage all applicants" ON applicants
+CREATE POLICY "Funcionarios can manage all applicants" ON applicants
     FOR ALL USING (
         EXISTS (
             SELECT 1 FROM profiles 
             WHERE profiles.id = auth.uid() 
-            AND profiles.role = 'employee'
+            AND profiles.role = 'funcionario'
         )
     );
 
@@ -212,12 +212,12 @@ CREATE POLICY "Anyone can view active forms" ON form_questions
     FOR SELECT USING (active = true);
 
 -- Política para form_questions: apenas funcionários podem gerenciar
-CREATE POLICY "Employees can manage forms" ON form_questions
+CREATE POLICY "Funcionarios can manage forms" ON form_questions
     FOR ALL USING (
         EXISTS (
             SELECT 1 FROM profiles 
             WHERE profiles.id = auth.uid() 
-            AND profiles.role = 'employee'
+            AND profiles.role = 'funcionario'
         )
     );
 
@@ -236,12 +236,12 @@ CREATE POLICY "Applicants can view own responses" ON form_responses
     );
 
 -- Política para form_responses: funcionários podem ver todas as respostas
-CREATE POLICY "Employees can view all responses" ON form_responses
+CREATE POLICY "Funcionarios can view all responses" ON form_responses
     FOR SELECT USING (
         EXISTS (
             SELECT 1 FROM profiles 
             WHERE profiles.id = auth.uid() 
-            AND profiles.role = 'employee'
+            AND profiles.role = 'funcionario'
         )
     );
 
@@ -260,12 +260,12 @@ CREATE POLICY "Applicants can view own attachments" ON attachments
     );
 
 -- Política para attachments: funcionários podem ver todos os anexos
-CREATE POLICY "Employees can view all attachments" ON attachments
+CREATE POLICY "Funcionarios can view all attachments" ON attachments
     FOR SELECT USING (
         EXISTS (
             SELECT 1 FROM profiles 
             WHERE profiles.id = auth.uid() 
-            AND profiles.role = 'employee'
+            AND profiles.role = 'funcionario'
         )
     );
 

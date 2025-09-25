@@ -1,5 +1,6 @@
 // Serviço de API para integração entre frontend e backend
 import { createClient } from "@/lib/supabase/client";
+import { ProfilesT } from "@/types/ProfilesT";
 
 // Tipos para as respostas da API
 export interface ApiResponse<T = any> {
@@ -8,17 +9,6 @@ export interface ApiResponse<T = any> {
   status: number;
 }
 
-// Tipos para os dados
-export interface Profile {
-  id: string;
-  role: "user" | "employee";
-  email?: string;
-  first_name?: string;
-  last_name?: string;
-  phone?: string;
-  created_at: string;
-  updated_at: string;
-}
 
 export interface Plan {
   id: string;
@@ -63,12 +53,14 @@ export interface Applicant {
 
 export interface FormQuestion {
   id: string;
-  plan_id: string;
+  plan: {
+    id: string;
+    name?: string;
+  }
   questions: any;
   active: boolean;
   created_at: string;
   updated_at: string;
-  plan_name?: string;
 }
 
 export interface FormResponse {
@@ -90,9 +82,31 @@ export interface VisaType {
 // Classe principal do serviço de API
 class ApiService {
   private supabase = createClient();
+  
+  // Expor o cliente supabase para uso em componentes específicos
+  get supabaseClient() {
+    return this.supabase;
+  }
 
   // Métodos para perfis
-  async getProfile(userId: string): Promise<ApiResponse<Profile>> {
+  async getProfiles(): Promise<ApiResponse<ProfilesT[]>> {
+    try {
+      const { data, error } = await this.supabase
+        .from("profiles")
+        .select("*")
+        .order("name");
+
+      if (error) {
+        return { error: error.message, status: 500 };
+      }
+
+      return { data, status: 200 };
+    } catch (error) {
+      return { error: "Erro ao buscar perfis", status: 500 };
+    }
+  }
+
+  async getProfile(userId: string): Promise<ApiResponse<ProfilesT>> {
     try {
       const { data, error } = await this.supabase
         .from("profiles")
@@ -111,8 +125,8 @@ class ApiService {
   }
 
   async createProfile(
-    profile: Partial<Profile>
-  ): Promise<ApiResponse<Profile>> {
+    profile: Partial<ProfilesT>
+  ): Promise<ApiResponse<ProfilesT>> {
     try {
       const { data, error } = await this.supabase
         .from("profiles")
@@ -132,8 +146,8 @@ class ApiService {
 
   async updateProfile(
     userId: string,
-    updates: Partial<Profile>
-  ): Promise<ApiResponse<Profile>> {
+    updates: Partial<ProfilesT>
+  ): Promise<ApiResponse<ProfilesT>> {
     try {
       const { data, error } = await this.supabase
         .from("profiles")
@@ -149,6 +163,23 @@ class ApiService {
       return { data, status: 200 };
     } catch (error) {
       return { error: "Erro ao atualizar perfil", status: 500 };
+    }
+  }
+
+  async deleteProfile(userId: string): Promise<ApiResponse<void>> {
+    try {
+      const { error } = await this.supabase
+        .from("profiles")
+        .delete()
+        .eq("id", userId);
+
+      if (error) {
+        return { error: error.message, status: 500 };
+      }
+
+      return { status: 200 };
+    } catch (error) {
+      return { error: "Erro ao deletar perfil", status: 500 };
     }
   }
 

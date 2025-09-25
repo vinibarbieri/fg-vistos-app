@@ -1,4 +1,4 @@
-import { AuthGuard } from "@/components/auth-guard";
+import { AuthGuard } from "@/components/authGuard/authGuard";
 
 export default function DashboardPage() {
   return <AuthGuard />;

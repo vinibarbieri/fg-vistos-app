@@ -83,7 +83,7 @@ O sistema utiliza Supabase Auth com dois tipos de usuários:
    - Visualização de pedidos pessoais
    - Preenchimento de formulários
 
-2. **Funcionários** (`role: 'employee'`)
+2. **Funcionários** (`role: 'funcionario'`)
    - Acesso completo ao sistema
    - Gestão de todos os pedidos
    - Administração de candidatos, planos e formulários

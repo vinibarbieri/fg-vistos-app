@@ -1,6 +1,5 @@
 import { createClient } from "@/lib/supabase/client";
 import { ApplicantT } from "@/types/ApplicantT";
-import { UserT } from "@/types/UserT";
 
 // ============================================================================
 // FUNÇÕES DO BACKEND - INTEGRADAS COM SUPABASE

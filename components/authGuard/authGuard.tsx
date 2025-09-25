@@ -2,14 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { DashboardNav } from "./dashboard-nav";
-import { UserDashboard } from "./user-dashboard";
-import { EmployeeDashboard } from "./employee-dashboard";
-import { apiService, Profile } from "@/lib/api-service";
+import { AdminDashboard } from "../pages/admin/adminDashboard";
+import { apiService } from "@/lib/api-service";
+import { DashboardNav } from "../dashboard-nav";
+import { FuncionarioDashboard } from "../pages/funcionario/funcionarioDashboard";
+import { ProfilesT } from "@/types/ProfilesT";
+import { ClienteDashboard } from "../pages/cliente/clienteDashboard";
 
 export function AuthGuard() {
   const [user, setUser] = useState<any>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const [profile, setProfile] = useState<ProfilesT | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
@@ -65,10 +67,12 @@ export function AuthGuard() {
       <DashboardNav userRole={profile.role} userName={user.email} />
 
       <main>
-        {profile.role === "employee" ? (
-          <EmployeeDashboard />
+        {profile.role === "Admin" ? (
+          <AdminDashboard />
+        ) : profile.role === "Funcionario" ? (
+          <FuncionarioDashboard />
         ) : (
-          <UserDashboard />
+          <ClienteDashboard />
         )}
       </main>
     </div>

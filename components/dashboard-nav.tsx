@@ -44,32 +44,22 @@ export function DashboardNav({ userRole, userName }: DashboardNavProps) {
               FG Vistos
             </Link>
 
-            {userRole === "employee" && (
+            {(userRole === "funcionario" || userRole === "admin") && (
               <div className="flex items-center space-x-4">
                 <Link
-                  href="/dashboard/orders"
+                  href="/dashboard"
                   className="text-sm hover:text-primary"
                 >
-                  Pedidos
+                  Dashboard
                 </Link>
-                <Link
-                  href="/dashboard/applicants"
-                  className="text-sm hover:text-primary"
-                >
-                  Candidatos
-                </Link>
-                <Link
-                  href="/dashboard/plans"
-                  className="text-sm hover:text-primary"
-                >
-                  Planos
-                </Link>
-                <Link
-                  href="/dashboard/forms"
-                  className="text-sm hover:text-primary"
-                >
-                  Formulários
-                </Link>
+                {userRole === "admin" && (
+                  <Link
+                    href="/dashboard/funcionarios"
+                    className="text-sm hover:text-primary"
+                  >
+                    Funcionários
+                  </Link>
+                )}
               </div>
             )}
 
@@ -92,8 +82,8 @@ export function DashboardNav({ userRole, userName }: DashboardNavProps) {
           </div>
 
           <div className="flex items-center space-x-4">
-            <Badge variant={userRole === "employee" ? "default" : "secondary"}>
-              {userRole === "employee" ? "Funcionário" : "Usuário"}
+            <Badge variant={userRole === "admin" ? "destructive" : userRole === "funcionario" ? "default" : "secondary"}>
+              {userRole === "admin" ? "Administrador" : userRole === "funcionario" ? "Funcionário" : "Cliente"}
             </Badge>
 
             <DropdownMenu>
@@ -112,7 +102,7 @@ export function DashboardNav({ userRole, userName }: DashboardNavProps) {
                   <div className="flex flex-col space-y-1 leading-none">
                     {userName && <p className="font-medium">{userName}</p>}
                     <p className="w-[200px] truncate text-sm text-muted-foreground">
-                      {userRole === "employee" ? "Funcionário" : "Usuário"}
+                      {userRole === "admin" ? "Administrador" : userRole === "funcionario" ? "Funcionário" : "Cliente"}
                     </p>
                   </div>
                 </div>

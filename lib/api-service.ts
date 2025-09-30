@@ -542,7 +542,7 @@ class ApiService {
 
       // Se não há dados, retornar status padrão
       if (!data || data.length === 0) {
-        return { data: "pending", status: 200 };
+        return { data: "Desconhecido", status: 200 };
       }
 
       return { data: data[0].status, status: 200 };

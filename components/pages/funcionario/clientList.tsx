@@ -143,31 +143,35 @@ export function ClientList() {
     router.push(`/protected/user?clientId=${clientId}`);
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string | undefined) => {
     switch (status) {
-      case "pending":
-        return "bg-yellow-100 text-yellow-800";
-      case "approved":
-        return "bg-green-100 text-green-800";
-      case "rejected":
-        return "bg-red-100 text-red-800";
-      case "processing":
-        return "bg-blue-100 text-blue-800";
+      case "em_andamento":
+        return "secondary";
+      case "submetido":
+        return "secondary";
+      case "em_revisao":
+        return "secondary";
+      case "aprovado":
+        return "default";
+      case "rejeitado":
+        return "destructive";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "outline";
     }
   };
 
-  const getStatusText = (status: string) => {
+  const getStatusText = (status: string | undefined) => {
     switch (status) {
-      case "pending":
-        return "Pendente";
-      case "approved":
+      case "em_andamento":
+        return "Em Andamento";
+      case "submetido":
+        return "Submetido";
+      case "em_revisao":
+        return "Em Revisão";
+      case "aprovado":
         return "Aprovado";
-      case "rejected":
+      case "rejeitado":
         return "Rejeitado";
-      case "processing":
-        return "Processando";
       default:
         return "Desconhecido";
     }
@@ -313,7 +317,7 @@ export function ClientList() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
             {filteredClients.map((client) => (
               <Card 
                 key={client.id} 
@@ -327,9 +331,12 @@ export function ClientList() {
                     </CardTitle>
                     <CardDescription>{client.email}</CardDescription>
                   </CardHeader>
-                  <Badge variant={client.account_status === true ? "default" : "secondary"} className="mr-4 self-center">
-                          {client.account_status === true ? "Ativo" : "Inativo"}
-                  </Badge>
+                  <div className="mr-4 self-center flex flex-col items-end">
+                    <span className="text-sm text-muted-foreground mb-1">Status do processo</span>
+                    <Badge variant={getStatusColor(client.status_processo)}>
+                      {getStatusText(client.status_processo)}
+                    </Badge>
+                  </div>
                 </div>
 
                 <CardContent>

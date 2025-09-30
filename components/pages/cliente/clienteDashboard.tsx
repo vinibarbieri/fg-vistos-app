@@ -124,7 +124,7 @@ export function ClienteDashboard({ clientId }: ClienteDashboardProps = {}) {
 
   if (authLoading || isLoading) {
     return (
-      <div className="space-y-6">
+      <div className="container mx-auto px-4 py-8 space-y-6">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-bold">Área do visto</h1>
           <p className="text-muted-foreground">Carregando...</p>
@@ -146,7 +146,7 @@ export function ClienteDashboard({ clientId }: ClienteDashboardProps = {}) {
   }));
 
   return (
-    <div className="space-y-6">
+    <div className="container mx-auto px-4 py-8 space-y-6">
       {/* Header da página */}
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-bold">Acompanhe o seu processo</h1>

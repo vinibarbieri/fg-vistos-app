@@ -23,6 +23,16 @@ export function DashboardNav({ userRole, userName, userEmail }: DashboardNavProp
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
+  // Determinar o link do dashboard baseado no role
+  const getDashboardLink = () => {
+    switch (userRole) {
+      case "Cliente":
+        return "/protected/user";
+      default:
+        return "/dashboard";
+    }
+  };
+
   const handleLogout = async () => {
     setIsLoading(true);
 
@@ -41,7 +51,7 @@ export function DashboardNav({ userRole, userName, userEmail }: DashboardNavProp
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center space-x-4">
-            <Link href="/dashboard" className="text-xl font-bold flex items-center gap-4">
+            <Link href={getDashboardLink()} className="text-2xl font-bold flex items-center gap-8">
               <img src="/fg-logo.svg" alt="FG Vistos" className="h-10 w-auto" />
             </Link>
           </div>

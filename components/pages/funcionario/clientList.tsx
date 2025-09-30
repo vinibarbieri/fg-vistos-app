@@ -13,10 +13,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { apiService, VisaType } from "@/lib/api-service";
+import { apiService } from "@/lib/api-service";
 import { ProfilesT } from "@/types/ProfilesT";
-import { OrderT } from "@/types/OrderT";
-import { ApplicantT } from "@/types/ApplicantT";
 
 // Tipo estendido para incluir dados relacionados
 type ClientDetails = ProfilesT & {

@@ -1,8 +1,42 @@
 import { updateSession } from "@/lib/supabase/middleware";
-import { type NextRequest } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
 
 export async function middleware(request: NextRequest) {
-  return await updateSession(request);
+  // Primeiro, atualizar a sessão
+  const response = await updateSession(request);
+  
+  // Verificar se é uma rota protegida
+  const { pathname } = request.nextUrl;
+  
+  // Rotas que precisam de autenticação
+  const protectedRoutes = ['/dashboard', '/protected'];
+  const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
+  
+  if (isProtectedRoute) {
+    // Verificar se o usuário está autenticado
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      return NextResponse.redirect(new URL('/auth/login', request.url));
+    }
+    
+    // Verificar role para rotas específicas
+    if (pathname.startsWith('/dashboard')) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+      
+      if (!profile || profile.role === 'Cliente') {
+        return NextResponse.redirect(new URL('/auth/login', request.url));
+      }
+    }
+  }
+  
+  return response;
 }
 
 export const config = {

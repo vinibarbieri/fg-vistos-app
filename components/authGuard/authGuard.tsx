@@ -64,7 +64,7 @@ export function AuthGuard() {
 
   return (
     <div className="min-h-screen bg-background">
-      <DashboardNav userRole={profile.role} userName={user.email} />
+      <DashboardNav userRole={profile.role} userName={profile.name} userEmail={user.email} />
 
       <main>
         {profile.role === "Admin" ? (

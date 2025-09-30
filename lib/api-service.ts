@@ -124,6 +124,23 @@ class ApiService {
     }
   }
 
+  async getClientes(): Promise<ApiResponse<ProfilesT[]>> {
+    try {
+      const { data, error } = await this.supabase
+        .from("profiles")
+        .select("*")
+        .eq("role", "Cliente");
+
+      if (error) {
+        return { error: error.message, status: 500 };
+      }
+
+      return { data, status: 200 };
+    } catch (error) {
+      return { error: "Erro ao buscar clientes", status: 500 };
+    }
+  }
+
   async createProfile(
     profile: Partial<ProfilesT>
   ): Promise<ApiResponse<ProfilesT>> {

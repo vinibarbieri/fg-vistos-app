@@ -26,7 +26,7 @@ export function AdminDashboard() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Dashboard do Administrador</h1>
         <p className="text-muted-foreground">
-          Gerencie clientes, funcionários, pedidos, candidatos e planos do sistema
+          Gerencie clientes, funcionários
         </p>
       </div>
 

@@ -29,7 +29,7 @@ export function FuncionarioDashboard() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Dashboard do Funcionário</h1>
         <p className="text-muted-foreground">
-          Gerencie pedidos, candidatos e planos do sistema
+          Gerencie clientes
         </p>
       </div>
 

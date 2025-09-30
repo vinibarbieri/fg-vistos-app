@@ -33,7 +33,8 @@ export function ClientList() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState({
-    status: "",
+    statusCliente: true,
+    statusProcesso: "",
     visaType: "",
     country: "",
     city: "",
@@ -47,9 +48,9 @@ export function ClientList() {
     try {
       setIsLoading(true);
 
-      // Buscar todos os perfis (usuários)
-      const profilesResponse = await apiService.getProfiles();
-      if (profilesResponse.error) throw new Error(profilesResponse.error);
+      // Buscar todos os clientes
+      const clientesResponse = await apiService.getClientes();
+      if (clientesResponse.error) throw new Error(clientesResponse.error);
 
       // Buscar tipos de visto
       const visaTypesResponse = await apiService.getVisaTypes();
@@ -66,7 +67,7 @@ export function ClientList() {
       if (ordersResponse.error) throw new Error(ordersResponse.error);
 
       // Combinar dados dos usuários com seus candidatos e pedidos
-      const clientsWithDetails: ClientWithDetails[] = profilesResponse.data?.map((profile) => {
+      const clientsWithDetails: ClientWithDetails[] = clientesResponse.data?.map((profile) => {
         const userApplicants = applicantsResponse.data?.filter(
           (applicant) => applicant.order_details?.responsible_user_email === profile.email
         ) || [];
@@ -82,7 +83,7 @@ export function ClientList() {
           // Adicionar campos que podem não existir no Profile
           interview_city: profile.interview_city || "Não informada",
           address: profile.address || "Não informado",
-          account_status: profile.account_status || "active",
+          account_status: profile.account_status || false,
         };
       }) || [];
 
@@ -101,8 +102,8 @@ export function ClientList() {
       clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       client.email?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesStatus = !filters.status || 
-      client.account_status?.toLowerCase() === filters.status.toLowerCase();
+    const matchesStatus = !filters.statusCliente || 
+      client.account_status === filters.statusCliente;
 
     // orders.responsible_user_id === client.id && orders.plan_id === plans.id -> plans.plan_name === filters.visaType
     // const matchesVisaType = !filters.visaType || (() => {
@@ -196,20 +197,34 @@ export function ClientList() {
           </div>
 
           {/* Filtros */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             <div>
-              <Label htmlFor="status">Status</Label>
+              <Label htmlFor="statusCliente">Status do Cliente</Label>
               <select
-                id="status"
+                id="statusCliente"
                 className="w-full bg-white p-2 border rounded-md mt-1"
-                value={filters.status}
-                onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
+                value={filters.statusCliente ? "true" : "false"}
+                onChange={(e) => setFilters(prev => ({ ...prev, statusCliente: e.target.value === "true" }))}
+              >
+                <option value="true">Ativo</option>
+                <option value="false">Inativo</option>
+              </select>
+            </div>
+
+            <div>
+              <Label htmlFor="statusProcesso">Status do Processo</Label>
+              <select
+                id="statusProcesso"
+                className="w-full bg-white p-2 border rounded-md mt-1"
+                value={filters.statusProcesso}
+                onChange={(e) => setFilters(prev => ({ ...prev, statusProcesso: e.target.value }))}
               >
                 <option value="">Todos os status</option>
-                <option value="pending">Pendente</option>
-                <option value="processing">Processando</option>
-                <option value="approved">Aprovado</option>
-                <option value="rejected">Rejeitado</option>
+                <option value="em_andamento">Em Andamento</option>
+                <option value="submetido">Submetido</option>
+                <option value="em_revisao">Em Revisão</option>
+                <option value="aprovado">Aprovado</option>
+                <option value="rejeitado">Rejeitado</option>
               </select>
             </div>
 
@@ -271,7 +286,7 @@ export function ClientList() {
             className="bg-secondary text-secondary-foreground hover:bg-primary hover:text-primary-foreground"
             onClick={() => {
               setSearchTerm("");
-              setFilters({ status: "", visaType: "", country: "", city: "" });
+              setFilters({ statusCliente: true, statusProcesso: "", visaType: "", country: "", city: "" });
             }}
           >
             Limpar Filtros
@@ -307,8 +322,8 @@ export function ClientList() {
                     </CardTitle>
                     <CardDescription>{client.email}</CardDescription>
                   </CardHeader>
-                  <Badge variant={client.account_status === "active" ? "default" : "secondary"} className="mr-4 self-center">
-                          {client.account_status === "active" ? "Ativo" : "Inativo"}
+                  <Badge variant={client.account_status === true ? "default" : "secondary"} className="mr-4 self-center">
+                          {client.account_status === true ? "Ativo" : "Inativo"}
                   </Badge>
                 </div>
 
@@ -365,7 +380,7 @@ export function ClientList() {
                     )} */}
 
                     <div className="pt-2 border-t">
-                      <Button variant="outline" size="sm" className="w-full bg-primary text-primary-foreground">
+                      <Button variant="outline" className="w-full bg-secondary text-secondary-foreground hover:bg-primary hover:text-primary-foreground">
                         Ver Detalhes
                       </Button>
                     </div>

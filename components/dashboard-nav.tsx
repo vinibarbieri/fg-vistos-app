@@ -16,9 +16,10 @@ import { Badge } from "@/components/ui/badge";
 interface DashboardNavProps {
   userRole: string;
   userName?: string;
+  userEmail?: string;
 }
 
-export function DashboardNav({ userRole, userName }: DashboardNavProps) {
+export function DashboardNav({ userRole, userName, userEmail }: DashboardNavProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -64,7 +65,7 @@ export function DashboardNav({ userRole, userName }: DashboardNavProps) {
                   <div className="flex flex-col space-y-1 leading-none">
                     {userName && <p className="font-medium">{userName}</p>}
                     <p className="w-[200px] truncate text-sm text-muted-foreground">
-                      {userRole === "Admin" ? "Administrador" : userRole === "Funcionario" ? "Funcionário" : "Cliente"}
+                      {userEmail ? userEmail : "Não informado"}
                     </p>
                   </div>
                 </div>

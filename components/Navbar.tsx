@@ -12,15 +12,27 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import { ArrowLeft } from "lucide-react";
 
-interface DashboardNavProps {
+interface NavbarProps {
   userRole: string;
   userName?: string;
+  userEmail?: string;
 }
 
-export function DashboardNav({ userRole, userName }: DashboardNavProps) {
+export function Navbar({ userRole, userName, userEmail }: NavbarProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+
+  // Determinar o link do dashboard baseado no role
+  const getDashboardLink = () => {
+    switch (userRole) {
+      case "Cliente":
+        return "/protected/user";
+      default:
+        return "/dashboard";
+    }
+  };
 
   const handleLogout = async () => {
     setIsLoading(true);
@@ -39,62 +51,25 @@ export function DashboardNav({ userRole, userName }: DashboardNavProps) {
     <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
+         <Button variant="ghost" onClick={() => router.back()}> <ArrowLeft size={16}/>Voltar</Button>
           <div className="flex items-center space-x-4">
-            <Link href="/dashboard" className="text-xl font-bold">
-              FG Vistos
+            <Link href={getDashboardLink()} className="text-2xl font-bold flex items-center">
+              <img src="/fg-logo.svg" alt="FG Vistos" className="h-10 w-auto" />
             </Link>
-
-            {(userRole === "funcionario" || userRole === "admin") && (
-              <div className="flex items-center space-x-4">
-                <Link
-                  href="/dashboard"
-                  className="text-sm hover:text-primary"
-                >
-                  Dashboard
-                </Link>
-                {userRole === "admin" && (
-                  <Link
-                    href="/dashboard/funcionarios"
-                    className="text-sm hover:text-primary"
-                  >
-                    Funcionários
-                  </Link>
-                )}
-              </div>
-            )}
-
-            {userRole === "user" && (
-              <div className="flex items-center space-x-4">
-                <Link
-                  href="/dashboard/my-orders"
-                  className="text-sm hover:text-primary"
-                >
-                  Meus Pedidos
-                </Link>
-                <Link
-                  href="/dashboard/forms"
-                  className="text-sm hover:text-primary"
-                >
-                  Formulários
-                </Link>
-              </div>
-            )}
           </div>
 
           <div className="flex items-center space-x-4">
-            <Badge variant={userRole === "admin" ? "destructive" : userRole === "funcionario" ? "default" : "secondary"}>
-              {userRole === "admin" ? "Administrador" : userRole === "funcionario" ? "Funcionário" : "Cliente"}
+            <Badge variant="secondary">
+              {userRole === "Admin" ? "Administrador" : userRole === "Funcionario" ? "Funcionário" : "Cliente"}
             </Badge>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="relative h-8 w-8 rounded-full"
-                >
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                    {userName?.charAt(0).toUpperCase() || "U"}
-                  </div>
+                  className="relative h-8 w-8 bg-primary text-primary-foreground rounded-full"
+                >                  
+                  {userName?.charAt(0).toUpperCase() || "U"}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56" align="end" forceMount>
@@ -102,7 +77,7 @@ export function DashboardNav({ userRole, userName }: DashboardNavProps) {
                   <div className="flex flex-col space-y-1 leading-none">
                     {userName && <p className="font-medium">{userName}</p>}
                     <p className="w-[200px] truncate text-sm text-muted-foreground">
-                      {userRole === "admin" ? "Administrador" : userRole === "funcionario" ? "Funcionário" : "Cliente"}
+                      {userEmail ? userEmail : "Não informado"}
                     </p>
                   </div>
                 </div>

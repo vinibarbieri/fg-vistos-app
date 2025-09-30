@@ -15,6 +15,8 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { apiService } from "@/lib/api-service";
+import { getRedirectUrlByRoleString } from "@/lib/auth-redirect";
 
 export function LoginForm({
   className,
@@ -33,13 +35,29 @@ export function LoginForm({
     setError(null);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
+      
       if (error) throw error;
-      // Redirecionar para o dashboard principal
-      router.push("/dashboard");
+      
+      // Buscar o perfil do usuário para determinar o role
+      if (data.user) {
+        const profileResponse = await apiService.getProfile(data.user.id);
+        
+        if (profileResponse.error || !profileResponse.data) {
+          console.error("Erro ao buscar perfil:", profileResponse.error);
+          setError("Erro ao carregar perfil do usuário");
+          return;
+        }
+        
+        // Redirecionar baseado no role do usuário
+        const redirectUrl = getRedirectUrlByRoleString(profileResponse.data.role);
+        router.push(redirectUrl);
+      } else {
+        router.push("/auth/login");
+      }
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {

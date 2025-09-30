@@ -13,20 +13,27 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { apiService, VisaType } from "@/lib/api-service";
+import { apiService } from "@/lib/api-service";
 import { ProfilesT } from "@/types/ProfilesT";
-import { OrderT } from "@/types/OrderT";
+
+// Tipo estendido para incluir dados relacionados
+type ClientDetails = ProfilesT & {
+  status_processo?: string;
+  applicants_quantity?: number;
+  plan_name?: string;
+  visa_name?: string;
+  country?: string;
+};
 
 
 export function ClientList() {
   const router = useRouter();
-  const [clients, setClients] = useState<ProfilesT[]>([]);
-  const [order, setOrder] = useState<OrderT[]>([]);
-  const [visaTypes, setVisaTypes] = useState<VisaType[]>([]);
+  const [clients, setClients] = useState<ClientDetails[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState({
-    status: "",
+    statusCliente: true,
+    statusProcesso: "",
     visaType: "",
     country: "",
     city: "",
@@ -40,46 +47,67 @@ export function ClientList() {
     try {
       setIsLoading(true);
 
-      // Buscar todos os perfis (usuários)
-      const profilesResponse = await apiService.getProfiles();
-      if (profilesResponse.error) throw new Error(profilesResponse.error);
-
-      // Buscar tipos de visto
-      const visaTypesResponse = await apiService.getVisaTypes();
-      if (visaTypesResponse.data) {
-        setVisaTypes(visaTypesResponse.data);
-      }
-
-      // Buscar candidatos para cada usuário
-      const applicantsResponse = await apiService.getApplicants();
-      if (applicantsResponse.error) throw new Error(applicantsResponse.error);
-
-      // Buscar pedidos para cada usuário
-      const ordersResponse = await apiService.getOrders();
-      if (ordersResponse.error) throw new Error(ordersResponse.error);
+      // Buscar todos os clientes
+      const clientesResponse = await apiService.getClientes();
+      if (clientesResponse.error) throw new Error(clientesResponse.error);
 
       // Combinar dados dos usuários com seus candidatos e pedidos
-      const clientsWithDetails = profilesResponse.data?.map((profile) => {
-        const userApplicants = applicantsResponse.data?.filter(
-          (applicant) => applicant.order_details?.responsible_user_email === profile.email
-        ) || [];
+      const clientsDetails: ClientDetails[] = await Promise.all(clientesResponse.data?.map(async (profile) => {
 
-        const userOrders = ordersResponse.data?.filter(
-          (order) => order.user_email === profile.email
-        ) || [];
+        // status_processo
+        const userProcessoStatus = await apiService.getApplicantStatusByResponsibleUserId(profile.id);
+        if (userProcessoStatus.error) {
+          console.warn(`Erro ao buscar status do processo para usuário ${profile.id}:`, userProcessoStatus.error);
+        }
+        const status_processo = userProcessoStatus.data || "Não informado";
+
+        // applicants_quantity, plan_id
+        const userOrderDetails = await apiService.getUserOrderDetails(profile.id);
+        if (userOrderDetails.error) {
+          console.warn(`Erro ao buscar detalhes do pedido para usuário ${profile.id}:`, userOrderDetails.error);
+        }
+        const applicants_quantity = userOrderDetails.data?.applicants_quantity || 0;
+        const plan_id = userOrderDetails.data?.plan_id || "Não informado";
+
+        // plan_name, visa_id
+        let plan_name = "Não informado";
+        let visa_name = "Não informado";
+        let country = "Não informado";
+        
+        if (plan_id) {
+          const userPlanDetails = await apiService.getPlanNameAndVisaId(plan_id);
+          if (userPlanDetails.error) {
+            console.warn(`Erro ao buscar detalhes do plano ${plan_id}:`, userPlanDetails.error);
+          } else {
+            plan_name = userPlanDetails.data?.plan_name || "Não informado";
+            const visa_id = userPlanDetails.data?.visa_id;
+            
+            if (visa_id) {
+              const userVisaDetails = await apiService.getVisaNameAndCountry(visa_id);
+              if (userVisaDetails.error) {
+                console.warn(`Erro ao buscar detalhes do visto ${visa_id}:`, userVisaDetails.error);
+              } else {
+                visa_name = userVisaDetails.data?.name || "Não informado";
+                country = userVisaDetails.data?.country || "Não informado";
+              }
+            }
+          }
+        }
 
         return {
           ...profile,
-          applicants: userApplicants,
-          orders: userOrders,
+          status_processo,
+          applicants_quantity,
+          plan_name,
+          visa_name,
+          country,
           // Adicionar campos que podem não existir no Profile
           interview_city: profile.interview_city || "Não informada",
-          address: profile.address || "Não informado",
-          account_status: profile.account_status || "active",
+          account_status: profile.account_status || false,
         };
-      }) || [];
+      }) || []);
 
-      setClients(clientsWithDetails);
+      setClients(clientsDetails);
     } catch (error) {
       console.error("Erro ao buscar dados:", error);
     } finally {
@@ -94,62 +122,58 @@ export function ClientList() {
       clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       client.email?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesStatus = !filters.status || 
-      client.account_status?.toLowerCase() === filters.status.toLowerCase();
-
-    // orders.responsible_user_id === client.id && orders.plan_id === plans.id -> plans.plan_name === filters.visaType
-    // const matchesVisaType = !filters.visaType || (() => {
-    //   order?.some(order => order.responsible_user_id?.includes(client.id) && order.plan_name?.includes(filters.visaType));
-    // })();
-
-    // const matchesCountry = !filters.country ||
-    //   client.orders?.some(order => {
-    //     const visaType = visaTypes.find(vt => vt.name === order.plan_name);
-    //     return visaType?.country === filters.country;
-    //   });
+    const matchesStatus = !filters.statusCliente || 
+      client.account_status === filters.statusCliente;
 
     const matchesCity = !filters.city ||
       client.interview_city?.toLowerCase().includes(filters.city.toLowerCase());
 
-    return matchesSearch && matchesStatus && matchesCity;
+    const matchesVisaType = !filters.visaType ||
+      client.visa_name?.toLowerCase().includes(filters.visaType.toLowerCase());
+
+    const matchesCountry = !filters.country ||
+      client.country?.toLowerCase().includes(filters.country.toLowerCase());
+
+    return matchesSearch && matchesStatus && matchesCity && matchesVisaType && matchesCountry;
   });
 
   const handleClientClick = (clientId: string) => {
     router.push(`/protected/user?clientId=${clientId}`);
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string | undefined) => {
     switch (status) {
-      case "pending":
-        return "bg-yellow-100 text-yellow-800";
-      case "approved":
-        return "bg-green-100 text-green-800";
-      case "rejected":
-        return "bg-red-100 text-red-800";
-      case "processing":
-        return "bg-blue-100 text-blue-800";
+      case "em_andamento":
+        return "secondary";
+      case "submetido":
+        return "secondary";
+      case "em_revisao":
+        return "secondary";
+      case "aprovado":
+        return "default";
+      case "rejeitado":
+        return "destructive";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "outline";
     }
   };
 
-  const getStatusText = (status: string) => {
+  const getStatusText = (status: string | undefined) => {
     switch (status) {
-      case "pending":
-        return "Pendente";
-      case "approved":
+      case "em_andamento":
+        return "Em Andamento";
+      case "submetido":
+        return "Submetido";
+      case "em_revisao":
+        return "Em Revisão";
+      case "aprovado":
         return "Aprovado";
-      case "rejected":
+      case "rejeitado":
         return "Rejeitado";
-      case "processing":
-        return "Processando";
       default:
         return "Desconhecido";
     }
   };
-
-  // Obter países únicos dos tipos de visto
-  // const uniqueCountries = [...new Set(visaTypes.map(vt => vt.country))].filter(Boolean);
   
   // Obter cidades únicas dos clientes
   const uniqueCities = [...new Set(clients.map(c => c.interview_city))].filter(Boolean);
@@ -182,27 +206,28 @@ export function ClientList() {
             <Label htmlFor="search">Buscar por nome ou email</Label>
             <Input
               id="search"
-              placeholder="Digite o nome ou email do responsável..."
+              placeholder="Digite o nome ou email..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
 
           {/* Filtros */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-4">
             <div>
-              <Label htmlFor="status">Status</Label>
+              <Label htmlFor="statusProcesso">Status do Processo</Label>
               <select
-                id="status"
-                className="w-full p-2 border rounded-md mt-1"
-                value={filters.status}
-                onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
+                id="statusProcesso"
+                className="w-full bg-white p-2 border rounded-md mt-1"
+                value={filters.statusProcesso}
+                onChange={(e) => setFilters(prev => ({ ...prev, statusProcesso: e.target.value }))}
               >
                 <option value="">Todos os status</option>
-                <option value="pending">Pendente</option>
-                <option value="processing">Processando</option>
-                <option value="approved">Aprovado</option>
-                <option value="rejected">Rejeitado</option>
+                <option value="em_andamento">Em Andamento</option>
+                <option value="submetido">Submetido</option>
+                <option value="em_revisao">Em Revisão</option>
+                <option value="aprovado">Aprovado</option>
+                <option value="rejeitado">Rejeitado</option>
               </select>
             </div>
 
@@ -210,41 +235,45 @@ export function ClientList() {
               <Label htmlFor="visaType">Tipo de Visto</Label>
               <select
                 id="visaType"
-                className="w-full p-2 border rounded-md mt-1"
+                className="w-full bg-white p-2 border rounded-md mt-1"
                 value={filters.visaType}
                 onChange={(e) => setFilters(prev => ({ ...prev, visaType: e.target.value }))}
               >
                 <option value="">Todos os tipos</option>
-                {visaTypes.map((visaType) => (
-                  <option key={visaType.id} value={visaType.name}>
-                    {visaType.name}
+                {clients.map((client) => (
+                  client.visa_name !== "Não informado" && (
+                  <option key={client.visa_name} value={client.visa_name}>
+                    {client.visa_name}
                   </option>
+                  )
                 ))}
               </select>
             </div>
 
-            {/* <div>
+            <div>
               <Label htmlFor="country">País</Label>
               <select
                 id="country"
-                className="w-full p-2 border rounded-md mt-1"
+                className="w-full bg-white p-2 border rounded-md mt-1"
                 value={filters.country}
                 onChange={(e) => setFilters(prev => ({ ...prev, country: e.target.value }))}
               >
                 <option value="">Todos os países</option>
-                {uniqueCountries.map((country) => (
-                  <option key={country} value={country}>
-                    {country}
-                  </option>
+                {clients.map((client) => (
+                  client.country !== "Não informado" && (
+                    <option key={client.country} value={client.country}>
+                      {client.country}
+                    </option>
+                  )
                 ))}
               </select>
-            </div> */}
+            </div>
 
             <div>
               <Label htmlFor="city">Cidade da Entrevista</Label>
               <select
                 id="city"
-                className="w-full p-2 border rounded-md mt-1"
+                className="w-full bg-white p-2 border rounded-md mt-1"
                 value={filters.city}
                 onChange={(e) => setFilters(prev => ({ ...prev, city: e.target.value }))}
               >
@@ -261,9 +290,10 @@ export function ClientList() {
           {/* Botão para limpar filtros */}
           <Button
             variant="outline"
+            className="bg-secondary text-secondary-foreground hover:bg-primary hover:text-primary-foreground"
             onClick={() => {
               setSearchTerm("");
-              setFilters({ status: "", visaType: "", country: "", city: "" });
+              setFilters({ statusCliente: true, statusProcesso: "", visaType: "", country: "", city: "" });
             }}
           >
             Limpar Filtros
@@ -285,67 +315,60 @@ export function ClientList() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
             {filteredClients.map((client) => (
               <Card 
                 key={client.id} 
                 className="cursor-pointer hover:shadow-md transition-shadow"
                 onClick={() => handleClientClick(client.id)}
               >
-                <CardHeader>
-                  <CardTitle className="text-lg">
-                    {`${client.name || ''}`.trim() || 'Nome não informado'}
-                  </CardTitle>
-                  <CardDescription>{client.email}</CardDescription>
-                </CardHeader>
+                <div className="flex justify-between">
+                  <CardHeader>
+                    <CardTitle className="text-lg">
+                      {`${client.name || ''}`.trim() || 'Nome não informado'}
+                    </CardTitle>
+                    <CardDescription>{client.email}</CardDescription>
+                  </CardHeader>
+                  <div className="mr-4 self-center flex flex-col items-end">
+                    <span className="text-sm text-muted-foreground mb-1">Status do processo</span>
+                    <Badge variant={getStatusColor(client.status_processo)}>
+                      {getStatusText(client.status_processo)}
+                    </Badge>
+                  </div>
+                </div>
+
                 <CardContent>
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span className="text-sm font-medium">Cidade:</span>
                       <span className="text-sm text-muted-foreground">
-                        {client.interview_city || "Não informada"}
+                        {client.interview_city}
                       </span>
                     </div>
 
                     <div className="flex justify-between">
-                      <span className="text-sm font-medium">Status da Conta:</span>
-                      <Badge variant={client.account_status === "active" ? "default" : "secondary"}>
-                        {client.account_status === "active" ? "Ativo" : "Inativo"}
-                      </Badge>
+                      <span className="text-sm font-medium">País:</span>
+                      <span className="text-sm text-muted-foreground">
+                        {client.country}
+                      </span>
                     </div>
 
-                    {/* {client.applicants && client.applicants.length > 0 && (
-                      <div className="space-y-1">
-                        <span className="text-sm font-medium">Candidatos:</span>
-                        {client.applicants.map((applicant) => (
-                          <div key={applicant.id} className="flex justify-between text-sm">
-                            <span>{applicant.name}</span>
-                            <Badge className={getStatusColor(applicant.status)}>
-                              {getStatusText(applicant.status)}
-                            </Badge>
-                          </div>
-                        ))}
-                      </div>
-                    )} */}
+                    <div className="flex justify-between">
+                      <span className="text-sm font-medium">Tipo de Visto:</span>
+                      <span className="text-sm text-muted-foreground">
+                        {client.visa_name}
+                      </span>
+                    </div>
 
-                    {/* {client.orders && client.orders.length > 0 && (
-                      <div className="space-y-1">
-                        <span className="text-sm font-medium">Pedidos:</span>
-                        {client.orders.map((order) => (
-                          <div key={order.id} className="text-sm">
-                            <div className="flex justify-between">
-                              <span>{order.plan_name}</span>
-                              <Badge variant="outline">
-                                {getStatusText(order.status)}
-                              </Badge>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )} */}
+                    <div className="flex justify-between">
+                      <span className="text-sm font-medium">Aplicantes:</span>
+                      <span className="text-sm text-muted-foreground">
+                        {client.applicants_quantity}
+                      </span>
+                    </div>
 
                     <div className="pt-2 border-t">
-                      <Button variant="outline" size="sm" className="w-full">
+                      <Button variant="outline" className="w-full bg-secondary text-secondary-foreground hover:bg-primary hover:text-primary-foreground">
                         Ver Detalhes
                       </Button>
                     </div>

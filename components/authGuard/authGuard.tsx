@@ -4,10 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AdminDashboard } from "../pages/admin/adminDashboard";
 import { apiService } from "@/lib/api-service";
-import { DashboardNav } from "../dashboard-nav";
 import { FuncionarioDashboard } from "../pages/funcionario/funcionarioDashboard";
 import { ProfilesT } from "@/types/ProfilesT";
-import { ClienteDashboard } from "../pages/cliente/clienteDashboard";
+import { getRedirectUrlByRole } from "@/lib/auth-redirect";
 
 export function AuthGuard() {
   const [user, setUser] = useState<any>(null);
@@ -42,6 +41,16 @@ export function AuthGuard() {
       }
 
       setProfile(profileResponse.data);
+
+      // Redirecionar automaticamente baseado no role se não estiver na página correta
+      const currentPath = window.location.pathname;
+      const expectedPath = getRedirectUrlByRole(profileResponse.data);
+      
+      // Se não estiver na página correta, redirecionar
+      if (currentPath !== expectedPath && !currentPath.startsWith('/protected/user')) {
+        router.push(expectedPath);
+        return;
+      }
     } catch (error) {
       console.error("Erro ao verificar usuário:", error);
       router.push("/auth/login");
@@ -64,15 +73,11 @@ export function AuthGuard() {
 
   return (
     <div className="min-h-screen bg-background">
-      <DashboardNav userRole={profile.role} userName={user.email} />
-
       <main>
         {profile.role === "Admin" ? (
           <AdminDashboard />
-        ) : profile.role === "Funcionario" ? (
-          <FuncionarioDashboard />
         ) : (
-          <ClienteDashboard />
+          <FuncionarioDashboard />
         )}
       </main>
     </div>

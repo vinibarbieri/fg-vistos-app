@@ -5,5 +5,5 @@ export type ProfilesT = {
     role: "Admin" | "Funcionario" | "Cliente";
     interview_city: string;
     address: string;
-    account_status: string;
+    account_status: boolean;
 }

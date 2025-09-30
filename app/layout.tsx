@@ -3,6 +3,7 @@ import { Geist } from "next/font/google";
 import "./globals.css";
 import { ToastProvider } from "@/lib/toast-context";
 import { ThemeProvider } from "next-themes";
+import { GlobalNav } from "@/components/GlobalNav";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -35,7 +36,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <ToastProvider>{children}</ToastProvider>
+          <ToastProvider>
+            <GlobalNav />
+            {children}
+          </ToastProvider>
         </ThemeProvider>
       </body>
     </html>

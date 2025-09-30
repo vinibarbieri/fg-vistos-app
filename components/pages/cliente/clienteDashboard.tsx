@@ -17,7 +17,11 @@ import {
 } from "@/lib/api/responsible-api";
 import { useAuth } from "@/lib/hooks/useAuth";
 
-export function ClienteDashboard() {
+interface ClienteDashboardProps {
+  clientId?: string;
+}
+
+export function ClienteDashboard({ clientId }: ClienteDashboardProps = {}) {
   const { user, loading: authLoading, userId } = useAuth();
   const [applicants, setApplicants] = useState<ApplicantT[]>([]);
   const [responsibleData, setResponsibleData] = useState<{ name: string; email: string } | null>(null);
@@ -27,24 +31,27 @@ export function ClienteDashboard() {
   // Usar os passos padrão e modificar baseado no status real
   const [processSteps, setProcessSteps] = useState<ProcessStep[]>(DEFAULT_PROCESS_STEPS);
 
+  // Determinar qual userId usar: clientId específico ou usuário logado
+  const targetUserId = clientId || userId;
+
   // Carregar dados do responsável e aplicações
   useEffect(() => {
-    if (!userId) return;
+    if (!targetUserId) return;
 
     const loadData = async () => {
       try {
         setIsLoading(true);
 
         // Buscar dados do responsável
-        const responsible = await getResponsibleDataAPI(userId);
+        const responsible = await getResponsibleDataAPI(targetUserId);
         setResponsibleData(responsible);
 
         // Buscar aplicações do responsável
-        const applications = await getResponsibleApplicationsAPI(userId);
+        const applications = await getResponsibleApplicationsAPI(targetUserId);
         setApplicants(applications);
 
         // Buscar status do processo
-        const status = await getProcessStatusAPI(userId);
+        const status = await getProcessStatusAPI(targetUserId);
         setProcessStatus(status);
 
         // Atualizar passos do processo baseado no status
@@ -58,7 +65,7 @@ export function ClienteDashboard() {
     };
 
     loadData();
-  }, [userId]);
+  }, [targetUserId]);
 
   // Atualizar passos do processo baseado no status
   const updateProcessSteps = (status: string) => {

@@ -179,38 +179,30 @@ export function FuncionarioManager() {
           <Card key={funcionario.id}>
             <CardHeader>
               <CardTitle className="text-lg">
-                {funcionario.name}
+                {funcionario.name || "Nome não informado"}
               </CardTitle>
               <CardDescription>{funcionario.email}</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span>Função:</span>
-                  <Badge className={getRoleColor(funcionario.role)}>
-                    {getRoleText(funcionario.role)}
-                  </Badge>
-                </div>
-
-                <div className="flex gap-2 mt-3">
-                  <select
-                    className="flex-1 p-2 border rounded-md text-sm"
-                    value={funcionario.role}
-                    onChange={(e) =>
-                      handleUpdateFuncionario(funcionario.id, { role: e.target.value as "Funcionario" | "Admin" })
-                    }
-                  >
-                    <option value="Funcionario">Funcionário</option>
-                    <option value="Admin">Administrador</option>
-                  </select>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDeleteFuncionario(funcionario.id)}
-                  >
-                    Deletar
-                  </Button>
-                </div>
+              <div className="flex gap-2">
+                <select
+                  className="flex-1 p-2 border rounded-md text-sm bg-white"
+                  value={funcionario.role}
+                  onChange={(e) =>
+                    handleUpdateFuncionario(funcionario.id, { role: e.target.value as "Funcionario" | "Admin" })
+                  }
+                >
+                  <option value="Funcionario">Funcionário</option>
+                  <option value="Admin">Administrador</option>
+                </select>
+                <Button
+                  variant="outline"
+                  className="bg-primary text-primary-foreground"
+                  size="sm"
+                  onClick={() => handleDeleteFuncionario(funcionario.id)}
+                >
+                  Deletar
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -282,7 +274,7 @@ export function FuncionarioManager() {
                 <Label htmlFor="role">Função</Label>
                 <select
                   id="role"
-                  className="w-full p-2 border rounded-md mt-1"
+                  className="w-full bg-white p-2 border rounded-md mt-1"
                   value={newFuncionario.role}
                   onChange={(e) =>
                     setNewFuncionario((prev) => ({

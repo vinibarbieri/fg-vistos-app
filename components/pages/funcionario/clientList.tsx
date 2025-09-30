@@ -16,11 +16,18 @@ import { Badge } from "@/components/ui/badge";
 import { apiService, VisaType } from "@/lib/api-service";
 import { ProfilesT } from "@/types/ProfilesT";
 import { OrderT } from "@/types/OrderT";
+import { ApplicantT } from "@/types/ApplicantT";
+
+// Tipo estendido para incluir dados relacionados
+type ClientWithDetails = ProfilesT & {
+  applicants?: ApplicantT[];
+  orders?: OrderT[];
+};
 
 
 export function ClientList() {
   const router = useRouter();
-  const [clients, setClients] = useState<ProfilesT[]>([]);
+  const [clients, setClients] = useState<ClientWithDetails[]>([]);
   const [order, setOrder] = useState<OrderT[]>([]);
   const [visaTypes, setVisaTypes] = useState<VisaType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -59,7 +66,7 @@ export function ClientList() {
       if (ordersResponse.error) throw new Error(ordersResponse.error);
 
       // Combinar dados dos usuários com seus candidatos e pedidos
-      const clientsWithDetails = profilesResponse.data?.map((profile) => {
+      const clientsWithDetails: ClientWithDetails[] = profilesResponse.data?.map((profile) => {
         const userApplicants = applicantsResponse.data?.filter(
           (applicant) => applicant.order_details?.responsible_user_email === profile.email
         ) || [];
@@ -70,8 +77,8 @@ export function ClientList() {
 
         return {
           ...profile,
-          applicants: userApplicants,
-          orders: userOrders,
+          applicants: userApplicants as unknown as ApplicantT[],
+          orders: userOrders as unknown as OrderT[],
           // Adicionar campos que podem não existir no Profile
           interview_city: profile.interview_city || "Não informada",
           address: profile.address || "Não informado",
@@ -189,12 +196,12 @@ export function ClientList() {
           </div>
 
           {/* Filtros */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
               <Label htmlFor="status">Status</Label>
               <select
                 id="status"
-                className="w-full p-2 border rounded-md mt-1"
+                className="w-full bg-white p-2 border rounded-md mt-1"
                 value={filters.status}
                 onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
               >
@@ -210,7 +217,7 @@ export function ClientList() {
               <Label htmlFor="visaType">Tipo de Visto</Label>
               <select
                 id="visaType"
-                className="w-full p-2 border rounded-md mt-1"
+                className="w-full bg-white p-2 border rounded-md mt-1"
                 value={filters.visaType}
                 onChange={(e) => setFilters(prev => ({ ...prev, visaType: e.target.value }))}
               >
@@ -227,7 +234,7 @@ export function ClientList() {
               <Label htmlFor="country">País</Label>
               <select
                 id="country"
-                className="w-full p-2 border rounded-md mt-1"
+                className="w-full bg-white p-2 border rounded-md mt-1"
                 value={filters.country}
                 onChange={(e) => setFilters(prev => ({ ...prev, country: e.target.value }))}
               >
@@ -244,7 +251,7 @@ export function ClientList() {
               <Label htmlFor="city">Cidade da Entrevista</Label>
               <select
                 id="city"
-                className="w-full p-2 border rounded-md mt-1"
+                className="w-full bg-white p-2 border rounded-md mt-1"
                 value={filters.city}
                 onChange={(e) => setFilters(prev => ({ ...prev, city: e.target.value }))}
               >
@@ -261,6 +268,7 @@ export function ClientList() {
           {/* Botão para limpar filtros */}
           <Button
             variant="outline"
+            className="bg-secondary text-secondary-foreground hover:bg-primary hover:text-primary-foreground"
             onClick={() => {
               setSearchTerm("");
               setFilters({ status: "", visaType: "", country: "", city: "" });
@@ -292,12 +300,18 @@ export function ClientList() {
                 className="cursor-pointer hover:shadow-md transition-shadow"
                 onClick={() => handleClientClick(client.id)}
               >
-                <CardHeader>
-                  <CardTitle className="text-lg">
-                    {`${client.name || ''}`.trim() || 'Nome não informado'}
-                  </CardTitle>
-                  <CardDescription>{client.email}</CardDescription>
-                </CardHeader>
+                <div className="flex justify-between">
+                  <CardHeader>
+                    <CardTitle className="text-lg">
+                      {`${client.name || ''}`.trim() || 'Nome não informado'}
+                    </CardTitle>
+                    <CardDescription>{client.email}</CardDescription>
+                  </CardHeader>
+                  <Badge variant={client.account_status === "active" ? "default" : "secondary"} className="mr-4 self-center">
+                          {client.account_status === "active" ? "Ativo" : "Inativo"}
+                  </Badge>
+                </div>
+
                 <CardContent>
                   <div className="space-y-2">
                     <div className="flex justify-between">
@@ -308,10 +322,16 @@ export function ClientList() {
                     </div>
 
                     <div className="flex justify-between">
-                      <span className="text-sm font-medium">Status da Conta:</span>
-                      <Badge variant={client.account_status === "active" ? "default" : "secondary"}>
-                        {client.account_status === "active" ? "Ativo" : "Inativo"}
-                      </Badge>
+                      <span className="text-sm font-medium">Tipo de Visto:</span>
+                      <span className="text-sm text-muted-foreground">
+                        {client.orders && client.orders.length > 0 
+                          ? client.orders.map(order => {
+                              const plan = visaTypes.find(vt => vt.id === order.plan_id);
+                              return plan ? plan.name : "Plano não encontrado";
+                            }).join(", ")
+                          : "Não informado"
+                        }
+                      </span>
                     </div>
 
                     {/* {client.applicants && client.applicants.length > 0 && (
@@ -345,7 +365,7 @@ export function ClientList() {
                     )} */}
 
                     <div className="pt-2 border-t">
-                      <Button variant="outline" size="sm" className="w-full">
+                      <Button variant="outline" size="sm" className="w-full bg-primary text-primary-foreground">
                         Ver Detalhes
                       </Button>
                     </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { ProcessInfo } from "@/components/process-info";
 import { VisaApplications } from "@/components/visa-applications";
 import { DEFAULT_PROCESS_STEPS, ProcessStep } from "@/types/process";
@@ -16,8 +17,18 @@ import {
   getProcessStatusAPI
 } from "@/lib/api/responsible-api";
 import { useAuth } from "@/lib/hooks/useAuth";
+import { ClienteDashboard } from "@/components/pages/cliente/clienteDashboard";
 
 export default function ResponsiblePage() {
+  const searchParams = useSearchParams();
+  const clientId = searchParams.get('clientId');
+  
+  // Se há um clientId, usar o ClienteDashboard com o clientId específico
+  if (clientId) {
+    return <ClienteDashboard clientId={clientId} />;
+  }
+
+  // Caso contrário, usar a lógica original para o usuário logado
   const { user, loading: authLoading, userId } = useAuth();
   const [applicants, setApplicants] = useState<ApplicantT[]>([]);
   const [responsibleData, setResponsibleData] = useState<{ name: string; email: string } | null>(null);

@@ -168,7 +168,7 @@ export function FuncionarioManager() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-semibold">Gerenciar Funcionários</h2>
-        <Button onClick={() => setShowCreateForm(true)}>
+        <Button className="bg-secondary text-secondary-foreground" onClick={() => setShowCreateForm(true)}>
           Adicionar Funcionário
         </Button>
       </div>
@@ -177,16 +177,27 @@ export function FuncionarioManager() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {funcionarios.map((funcionario) => (
           <Card key={funcionario.id}>
-            <CardHeader>
-              <CardTitle className="text-lg">
-                {funcionario.name || "Nome não informado"}
-              </CardTitle>
-              <CardDescription>{funcionario.email}</CardDescription>
-            </CardHeader>
+            <div className="flex justify-between">
+              <CardHeader>
+                <CardTitle className="text-lg">
+                  {funcionario.name || "Nome não informado"}
+                </CardTitle>
+                <CardDescription>{funcionario.email}</CardDescription>
+              </CardHeader>
+              <Button
+                variant="outline"
+                className="bg-primary text-primary-foreground self-center mr-6"
+                size="sm"
+                onClick={() => handleDeleteFuncionario(funcionario.id)}
+              >
+                  Deletar
+              </Button>
+            </div>
+
             <CardContent>
               <div className="flex gap-2">
                 <select
-                  className="flex-1 p-2 border rounded-md text-sm bg-white"
+                  className="flex-1 p-2 border rounded-md bg-white"
                   value={funcionario.role}
                   onChange={(e) =>
                     handleUpdateFuncionario(funcionario.id, { role: e.target.value as "Funcionario" | "Admin" })
@@ -195,14 +206,6 @@ export function FuncionarioManager() {
                   <option value="Funcionario">Funcionário</option>
                   <option value="Admin">Administrador</option>
                 </select>
-                <Button
-                  variant="outline"
-                  className="bg-primary text-primary-foreground"
-                  size="sm"
-                  onClick={() => handleDeleteFuncionario(funcionario.id)}
-                >
-                  Deletar
-                </Button>
               </div>
             </CardContent>
           </Card>

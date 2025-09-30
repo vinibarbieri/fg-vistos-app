@@ -12,14 +12,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import { ArrowLeft } from "lucide-react";
 
-interface DashboardNavProps {
+interface NavbarProps {
   userRole: string;
   userName?: string;
   userEmail?: string;
 }
 
-export function DashboardNav({ userRole, userName, userEmail }: DashboardNavProps) {
+export function Navbar({ userRole, userName, userEmail }: NavbarProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -50,8 +51,9 @@ export function DashboardNav({ userRole, userName, userEmail }: DashboardNavProp
     <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
+         <Button variant="ghost" onClick={() => router.back()}> <ArrowLeft size={16}/>Voltar</Button>
           <div className="flex items-center space-x-4">
-            <Link href={getDashboardLink()} className="text-2xl font-bold flex items-center gap-8">
+            <Link href={getDashboardLink()} className="text-2xl font-bold flex items-center">
               <img src="/fg-logo.svg" alt="FG Vistos" className="h-10 w-auto" />
             </Link>
           </div>

@@ -6,20 +6,7 @@ import { ClientList } from "../funcionario/clientList";
 import { FuncionarioManager } from "./tabs/funcionarioManager";
 
 export function AdminDashboard() {
-  const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'clientes' | 'funcionarios'>('clientes');
-
-  useEffect(() => {
-    // Componente não precisa buscar dados inicialmente
-  }, []);
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-lg">Carregando...</div>
-      </div>
-    );
-  }
 
   return (
     <div className="container mx-auto px-4 py-8">

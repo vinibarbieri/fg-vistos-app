@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { apiService } from "@/lib/api-service";
-import { DashboardNav } from "./dashboard-nav";
 import { ProfilesT } from "@/types/ProfilesT";
+import { Navbar } from "./Navbar";
 
 export function GlobalNav() {
   const [user, setUser] = useState<any>(null);
@@ -58,7 +58,7 @@ export function GlobalNav() {
   }
 
   return (
-    <DashboardNav 
+    <Navbar 
       userRole={profile.role} 
       userName={profile.name} 
       userEmail={user.email} 

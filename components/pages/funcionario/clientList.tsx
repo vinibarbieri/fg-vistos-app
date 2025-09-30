@@ -13,7 +13,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { apiService } from "@/lib/api-service";
 import { ProfilesT } from "@/types/ProfilesT";
 
 // Tipo estendido para incluir dados relacionados
@@ -47,66 +46,20 @@ export function ClientList() {
     try {
       setIsLoading(true);
 
-      // Buscar todos os clientes
-      const clientesResponse = await apiService.getClientes();
-      if (clientesResponse.error) throw new Error(clientesResponse.error);
+      // Buscar dados consolidados dos clientes através do endpoint seguro
+      const response = await fetch('/api/clients', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
-      // Combinar dados dos usuários com seus candidatos e pedidos
-      const clientsDetails: ClientDetails[] = await Promise.all(clientesResponse.data?.map(async (profile) => {
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erro ao buscar clientes');
+      }
 
-        // status_processo
-        const userProcessoStatus = await apiService.getApplicantStatusByResponsibleUserId(profile.id);
-        if (userProcessoStatus.error) {
-          console.warn(`Erro ao buscar status do processo para usuário ${profile.id}:`, userProcessoStatus.error);
-        }
-        const status_processo = userProcessoStatus.data || "Não informado";
-
-        // applicants_quantity, plan_id
-        const userOrderDetails = await apiService.getUserOrderDetails(profile.id);
-        if (userOrderDetails.error) {
-          console.warn(`Erro ao buscar detalhes do pedido para usuário ${profile.id}:`, userOrderDetails.error);
-        }
-        const applicants_quantity = userOrderDetails.data?.applicants_quantity || 0;
-        const plan_id = userOrderDetails.data?.plan_id || "Não informado";
-
-        // plan_name, visa_id
-        let plan_name = "Não informado";
-        let visa_name = "Não informado";
-        let country = "Não informado";
-        
-        if (plan_id) {
-          const userPlanDetails = await apiService.getPlanNameAndVisaId(plan_id);
-          if (userPlanDetails.error) {
-            console.warn(`Erro ao buscar detalhes do plano ${plan_id}:`, userPlanDetails.error);
-          } else {
-            plan_name = userPlanDetails.data?.plan_name || "Não informado";
-            const visa_id = userPlanDetails.data?.visa_id;
-            
-            if (visa_id) {
-              const userVisaDetails = await apiService.getVisaNameAndCountry(visa_id);
-              if (userVisaDetails.error) {
-                console.warn(`Erro ao buscar detalhes do visto ${visa_id}:`, userVisaDetails.error);
-              } else {
-                visa_name = userVisaDetails.data?.name || "Não informado";
-                country = userVisaDetails.data?.country || "Não informado";
-              }
-            }
-          }
-        }
-
-        return {
-          ...profile,
-          status_processo,
-          applicants_quantity,
-          plan_name,
-          visa_name,
-          country,
-          // Adicionar campos que podem não existir no Profile
-          interview_city: profile.interview_city || "Não informada",
-          account_status: profile.account_status || false,
-        };
-      }) || []);
-
+      const clientsDetails: ClientDetails[] = await response.json();
       setClients(clientsDetails);
     } catch (error) {
       console.error("Erro ao buscar dados:", error);

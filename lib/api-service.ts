@@ -124,23 +124,6 @@ class ApiService {
     }
   }
 
-  async getClientes(): Promise<ApiResponse<ProfilesT[]>> {
-    try {
-      const { data, error } = await this.supabase
-        .from("profiles")
-        .select("*")
-        .eq("role", "Cliente");
-
-      if (error) {
-        return { error: error.message, status: 500 };
-      }
-
-      return { data, status: 200 };
-    } catch (error) {
-      return { error: "Erro ao buscar clientes", status: 500 };
-    }
-  }
-
   async createProfile(
     profile: Partial<ProfilesT>
   ): Promise<ApiResponse<ProfilesT>> {
@@ -215,24 +198,6 @@ class ApiService {
       return { data, status: 200 };
     } catch (error) {
       return { error: "Erro ao buscar planos", status: 500 };
-    }
-  }
-
-  async getPlanNameAndVisaId(planId: string): Promise<ApiResponse < { plan_name: string, visa_id: string } >> {
-    try {
-      const { data, error } = await this.supabase
-        .from("plans")
-        .select("plan_name, visa_id")
-        .eq("id", planId)
-        .single();
-
-      if (error) {
-        return { error: error.message, status: 500 };
-      }
-
-      return { data, status: 200 };
-    } catch (error) {
-      return { error: "Erro ao buscar nome do plano e id do visto", status: 500 };
     }
   }
 
@@ -383,30 +348,6 @@ class ApiService {
     }
   }
 
-  // Metodo para buscar o applicants_quantity e plan_id do orders de um responsible_user_id
-  async getUserOrderDetails(userId: string): Promise<ApiResponse<{ applicants_quantity: number, plan_id: string }>> {
-    try {
-      const { data, error } = await this.supabase
-        .from("orders")
-        .select("applicants_quantity, plan_id")
-        .eq("responsible_user_id", userId)
-        .limit(1);
-
-      if (error) {
-        return { error: error.message, status: 500 };
-      }
-
-      // Se não há dados, retornar valores padrão
-      if (!data || data.length === 0) {
-        return { data: { applicants_quantity: 0, plan_id: "" }, status: 200 };
-      }
-
-      return { data: data[0], status: 200 };
-    } catch (error) {
-      return { error: "Erro ao buscar detalhes do pedido do usuário", status: 500 };
-    }
-  }
-
   async createOrder(order: Partial<Order>): Promise<ApiResponse<Order>> {
     try {
       const { data, error } = await this.supabase
@@ -528,28 +469,6 @@ class ApiService {
     }
   }
 
-  async getApplicantStatusByResponsibleUserId(responsibleUserId: string): Promise<ApiResponse<string>> {
-    try {
-      const { data, error } = await this.supabase
-        .from("applicants")
-        .select("status")
-        .eq("responsible_user_id", responsibleUserId)
-        .limit(1);
-
-      if (error) {
-        return { error: error.message, status: 500 };
-      }
-
-      // Se não há dados, retornar status padrão
-      if (!data || data.length === 0) {
-        return { data: "Desconhecido", status: 200 };
-      }
-
-      return { data: data[0].status, status: 200 };
-    } catch (error) {
-      return { error: "Erro ao buscar status do aplicante", status: 500 };
-    }
-  }
 
   async createApplicant(
     applicant: Partial<Applicant>
@@ -732,24 +651,6 @@ class ApiService {
       return { data, status: 200 };
     } catch (error) {
       return { error: "Erro ao buscar vistos", status: 500 };
-    }
-  }
-
-  async getVisaNameAndCountry(visaId: string): Promise<ApiResponse<{ name: string, country: string }>> {
-    try {
-      const { data, error } = await this.supabase
-        .from("visas")
-        .select("name, country")
-        .eq("id", visaId)
-        .single();
-
-      if (error) {
-        return { error: error.message, status: 500 };
-      }
-
-      return { data, status: 200 };
-    } catch (error) {
-      return { error: "Erro ao buscar nome e país do visto", status: 500 };
     }
   }
 

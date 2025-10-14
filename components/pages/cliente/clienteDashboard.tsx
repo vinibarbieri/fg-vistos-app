@@ -25,8 +25,9 @@ export function ClienteDashboard({ clientId }: ClienteDashboardProps = {}) {
   const { user, loading: authLoading, userId } = useAuth();
   const [applicants, setApplicants] = useState<ApplicantT[]>([]);
   const [responsibleData, setResponsibleData] = useState<{ name: string; email: string } | null>(null);
-  const [processStatus, setProcessStatus] = useState<string>('pending');
+  const [processStatus, setProcessStatus] = useState<string>('sem_status');
   const [isLoading, setIsLoading] = useState(true);
+  const [editingNames, setEditingNames] = useState<Set<string>>(new Set());
 
   // Usar os passos padrão e modificar baseado no status real
   const [processSteps, setProcessSteps] = useState<ProcessStep[]>(DEFAULT_PROCESS_STEPS);
@@ -72,20 +73,26 @@ export function ClienteDashboard({ clientId }: ClienteDashboardProps = {}) {
     const newSteps = [...DEFAULT_PROCESS_STEPS];
     
     switch (status) {
-      case 'completed':
+      case 'rejeitado':
         newSteps.forEach(step => step.completed = true);
         break;
-      case 'reviewing':
+      case 'aprovado':
+        newSteps.forEach(step => step.completed = true);
+        break;
+      case 'entrevista':
         newSteps.slice(0, 4).forEach(step => step.completed = true);
         break;
-      case 'submitted':
+      case 'documentos_em_analise':
         newSteps.slice(0, 3).forEach(step => step.completed = true);
         break;
-      case 'in_progress':
+      case 'documentos_enviados':
         newSteps.slice(0, 2).forEach(step => step.completed = true);
         break;
-      case 'pending':
+      case 'pago':
         newSteps.slice(0, 1).forEach(step => step.completed = true);
+        break;
+      case 'pendente':
+        newSteps.slice(0, 0).forEach(step => step.completed = true);
         break;
     }
     
@@ -98,6 +105,9 @@ export function ClienteDashboard({ clientId }: ClienteDashboardProps = {}) {
   };
 
   const handleEditPersonName = async (personId: string, newName: string) => {
+    // Adicionar o ID do aplicante ao set de edição
+    setEditingNames(prev => new Set(prev).add(personId));
+    
     try {
       const success = await updateApplicantNameAPI(personId, newName);
       if (success) {
@@ -111,6 +121,13 @@ export function ClienteDashboard({ clientId }: ClienteDashboardProps = {}) {
       }
     } catch (error) {
       console.error("Erro ao atualizar nome:", error);
+    } finally {
+      // Remover o ID do aplicante do set de edição
+      setEditingNames(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(personId);
+        return newSet;
+      });
     }
   };
 
@@ -167,6 +184,7 @@ export function ClienteDashboard({ clientId }: ClienteDashboardProps = {}) {
         people={people}
         onEditName={handleEditPersonName}
         onFillForm={handleFillForm}
+        editingNames={editingNames}
       />
     </div>
   );

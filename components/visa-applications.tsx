@@ -6,25 +6,28 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { User, Edit2, Check, X } from "lucide-react";
+import { User, Edit2, Check, X, Loader2 } from "lucide-react";
 import { Person } from "@/types/process";
 
 interface VisaApplicationsProps {
   people: Person[];
   onEditName: (personId: string, newName: string) => void;
   onFillForm: (personId: string) => void;
+  editingNames: Set<string>;
 }
 
 interface EditableNameProps {
   person: Person;
   onSave: (newName: string) => void;
+  isLoading: boolean;
 }
 
-function EditableName({ person, onSave }: EditableNameProps) {
+function EditableName({ person, onSave, isLoading }: EditableNameProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(person.name);
 
   const handleEdit = () => {
+    if (isLoading) return;
     setIsEditing(true);
     setEditValue(person.name);
   };
@@ -35,6 +38,7 @@ function EditableName({ person, onSave }: EditableNameProps) {
   };
 
   const handleSave = () => {
+    if (isLoading) return;
     if (editValue.trim() && editValue.trim() !== person.name) {
       onSave(editValue.trim());
     }
@@ -59,11 +63,27 @@ function EditableName({ person, onSave }: EditableNameProps) {
           placeholder="Digite o nome"
           className="h-8 text-sm"
           autoFocus
+          disabled={isLoading}
         />
-        <Button size="sm" onClick={handleSave} className="h-8 w-8 p-0">
-          <Check className="h-4 w-4" />
+        <Button 
+          size="sm" 
+          onClick={handleSave} 
+          className="h-8 w-8 p-0"
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Check className="h-4 w-4" />
+          )}
         </Button>
-        <Button size="sm" variant="outline" onClick={handleCancel} className="h-8 w-8 p-0">
+        <Button 
+          size="sm" 
+          variant="outline" 
+          onClick={handleCancel} 
+          className="h-8 w-8 p-0"
+          disabled={isLoading}
+        >
           <X className="h-4 w-4" />
         </Button>
       </div>
@@ -73,14 +93,18 @@ function EditableName({ person, onSave }: EditableNameProps) {
   return (
     <div className="flex items-center gap-2 group">
       <span className="font-medium">{person.name}</span>
-      <Button
-        size="sm"
-        variant="ghost"
-        onClick={handleEdit}
-        className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-      >
-        <Edit2 className="h-3 w-3" />
-      </Button>
+      {isLoading ? (
+        <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+      ) : (
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={handleEdit}
+          className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+        >
+          <Edit2 className="h-3 w-3" />
+        </Button>
+      )}
     </div>
   );
 }
@@ -88,7 +112,8 @@ function EditableName({ person, onSave }: EditableNameProps) {
 export function VisaApplications({
   people,
   onEditName,
-  onFillForm
+  onFillForm,
+  editingNames
 }: VisaApplicationsProps) {
 
   const getStatusText = (progress: number) => {
@@ -123,6 +148,7 @@ export function VisaApplications({
                       <EditableName
                         person={person}
                         onSave={(newName) => onEditName(person.id, newName)}
+                        isLoading={editingNames.has(person.id)}
                       />
                     </div>
 

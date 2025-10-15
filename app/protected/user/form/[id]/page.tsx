@@ -51,9 +51,14 @@ export default function FormPage() {
 
         setFormData(formData);
 
-        // TODO: Carregar respostas salvas do banco
-        // const savedAnswers = await getFormAnswersAPI(applicantId);
-        // setFormProgress(prev => ({ ...prev, answers: savedAnswers }));
+        // Carregar respostas salvas do banco
+        const savedAnswersResponse = await apiService.getFormAnswers(applicantId);
+        if (savedAnswersResponse.data && savedAnswersResponse.data.hasAnswers) {
+          setFormProgress(prev => ({ 
+            ...prev, 
+            answers: savedAnswersResponse.data.answers 
+          }));
+        }
 
       } catch (error) {
         console.error("Erro ao carregar formulário:", error);
@@ -72,13 +77,18 @@ export default function FormPage() {
     try {
       setIsSaving(true);
       
-      // TODO: Implementar API call para salvar form_answer
-      // await saveFormAnswersAPI(applicantId, answers || formProgress.answers);
+      const answersToSave = answers || formProgress.answers;
+      const response = await apiService.saveFormAnswers(applicantId, answersToSave, false);
+      
+      if (response.error) {
+        console.error("Erro ao salvar:", response.error);
+        return;
+      }
       
       setHasUnsavedChanges(false);
       setFormProgress(prev => ({
         ...prev,
-        lastSaved: new Date().toISOString()
+        lastSaved: response.data.savedAt
       }));
       
       console.log("Progresso salvo com sucesso!");
@@ -150,10 +160,15 @@ export default function FormPage() {
   // Finalizar formulário
   const handleSubmit = async () => {
     try {
-      await saveProgress();
+      // Salvar e marcar como completo
+      const response = await apiService.saveFormAnswers(applicantId, formProgress.answers, true);
       
-      // TODO: Marcar formulário como completo
-      // await markFormAsCompleteAPI(applicantId);
+      if (response.error) {
+        console.error("Erro ao finalizar formulário:", response.error);
+        return;
+      }
+      
+      console.log("Formulário finalizado com sucesso!");
       
       // Redirecionar de volta ao dashboard
       router.push("/protected/user");
@@ -186,7 +201,6 @@ export default function FormPage() {
   }
 
   const currentStep = formData.steps[formProgress.currentStep];
-  console.log(currentStep);
   const isLastStep = formProgress.currentStep >= formData.totalSteps - 1;
   const progressPercentage = ((formProgress.currentStep + 1) / formData.totalSteps) * 100;
 

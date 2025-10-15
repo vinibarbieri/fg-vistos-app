@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -115,6 +116,7 @@ export function VisaApplications({
   onFillForm,
   editingNames
 }: VisaApplicationsProps) {
+  const router = useRouter();
 
   const getStatusText = (progress: number) => {
     if (progress === 0) return "Não iniciado";
@@ -166,7 +168,7 @@ export function VisaApplications({
 
                     {/* Botão de ação */}
                     <Button
-                      onClick={() => onFillForm(person.id)}
+                      onClick={() => router.push(`/protected/user/form/${person.id}`)}
                       className="w-full"
                       variant={person.progress === 0 ? "default" : "outline"}
                     >

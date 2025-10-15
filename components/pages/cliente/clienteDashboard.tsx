@@ -131,11 +131,6 @@ export function ClienteDashboard({ clientId }: ClienteDashboardProps = {}) {
     }
   };
 
-  const handleFillForm = (personId: string) => {
-    console.log("Abrir formulário para aplicante:", personId);
-    // TODO: Implementar navegação para o formulário
-    // Por exemplo: router.push(`/protected/user/form/${personId}`);
-  };
 
 
 
@@ -183,7 +178,7 @@ export function ClienteDashboard({ clientId }: ClienteDashboardProps = {}) {
       <VisaApplications
         people={people}
         onEditName={handleEditPersonName}
-        onFillForm={handleFillForm}
+        onFillForm={() => {}} // Não usado mais, mas mantido para compatibilidade
         editingNames={editingNames}
       />
     </div>

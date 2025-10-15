@@ -1,4 +1,5 @@
 export type FormQuestionsT = {
     id: string;
-    question: string;
+    questions: string;
+    country: string;
 }

@@ -654,6 +654,28 @@ class ApiService {
     }
   }
 
+  // Método para buscar form_questions por applicant
+  async getFormQuestionsByApplicant(applicantId: string): Promise<ApiResponse<any>> {
+    try {
+      const response = await fetch(`/api/applicants/${applicantId}/form-questions`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return { error: data.error || 'Erro ao buscar formulário', status: response.status };
+      }
+
+      return { data, status: 200 };
+    } catch (error) {
+      return { error: "Erro ao buscar formulário do applicant", status: 500 };
+    }
+  }
+
   // Métodos para respostas de formulário
   async submitFormResponse(
     response: Partial<FormResponse>

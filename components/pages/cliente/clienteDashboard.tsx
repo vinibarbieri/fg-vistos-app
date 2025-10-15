@@ -16,6 +16,7 @@ import {
   getProcessStatusAPI
 } from "@/lib/api/responsible-api";
 import { useAuth } from "@/lib/hooks/useAuth";
+import { apiService } from "@/lib/api-service";
 
 interface ClienteDashboardProps {
   clientId?: string;
@@ -25,7 +26,6 @@ export function ClienteDashboard({ clientId }: ClienteDashboardProps = {}) {
   const { user, loading: authLoading, userId } = useAuth();
   const [applicants, setApplicants] = useState<ApplicantT[]>([]);
   const [responsibleData, setResponsibleData] = useState<{ name: string; email: string } | null>(null);
-  const [processStatus, setProcessStatus] = useState<string>('sem_status');
   const [isLoading, setIsLoading] = useState(true);
   const [editingNames, setEditingNames] = useState<Set<string>>(new Set());
 
@@ -49,12 +49,30 @@ export function ClienteDashboard({ clientId }: ClienteDashboardProps = {}) {
 
         // Buscar aplicações do responsável
         const applications = await getResponsibleApplicationsAPI(targetUserId);
-        setApplicants(applications);
 
+        // Buscar progresso real de cada applicant
+        const applicantsProgress = applications.map(async (applicant) => {
+          let progressValue: number;
+          try {
+            const progressResponse = await apiService.getFormAnswers(applicant.id);
+            progressValue = progressResponse.data?.progress?.progressPercentage || getFormStatusProgress(applicant.form_status)
+          } catch (error) {
+            console.error(`Erro ao buscar progresso do applicant ${applicant.id}:`, error);
+            progressValue = getFormStatusProgress(applicant.form_status)
+          }
+          
+          return {
+            ...applicant,
+            progress: progressValue
+          };
+        });
+
+        const finalApplicants = await Promise.all(applicantsProgress);
+        
+        setApplicants(finalApplicants);
+        
         // Buscar status do processo
         const status = await getProcessStatusAPI(targetUserId);
-        setProcessStatus(status);
-
         // Atualizar passos do processo baseado no status
         updateProcessSteps(status);
 
@@ -133,7 +151,6 @@ export function ClienteDashboard({ clientId }: ClienteDashboardProps = {}) {
 
 
 
-
   if (authLoading || isLoading) {
     return (
       <div className="container mx-auto px-4 py-8 space-y-6">
@@ -143,18 +160,6 @@ export function ClienteDashboard({ clientId }: ClienteDashboardProps = {}) {
       </div>
     );
   }
-
-  // Converter ApplicantT para Person (interface esperada pelo componente)
-  const people = applicants.map(applicant => ({
-    id: applicant.id,
-    name: applicant.name,
-    progress: getFormStatusProgress(applicant.form_status),
-    status: (applicant.form_status === 'completed' ? 'completed' : 
-            applicant.form_status === 'in_progress' ? 'in_progress' : 'not_started') as 'not_started' | 'in_progress' | 'completed',
-    formData: {},
-    created_at: applicant.created_at,
-    updated_at: applicant.updated_at
-  }));
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-6">
@@ -176,9 +181,8 @@ export function ClienteDashboard({ clientId }: ClienteDashboardProps = {}) {
 
       {/* Minhas Aplicações de Visto */}
       <VisaApplications
-        people={people}
+        applicants={applicants}
         onEditName={handleEditPersonName}
-        onFillForm={() => {}} // Não usado mais, mas mantido para compatibilidade
         editingNames={editingNames}
       />
     </div>

@@ -18,26 +18,6 @@ export interface Responsible {
   updated_at: string;
 }
 
-export interface Person {
-  id: string;
-  name: string; // "Pessoa 1", "Pessoa 2", etc.
-  progress: number; // 0-100
-  status: 'not_started' | 'in_progress' | 'completed';
-  formData?: Record<string, any>;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface ResponsibleApplication {
-  id: string;
-  responsible_id: string;
-  people: Person[];
-  processSteps: ProcessStep[];
-  status: 'draft' | 'submitted' | 'reviewing' | 'approved' | 'rejected';
-  created_at: string;
-  updated_at: string;
-}
-
 // Configuração padrão dos passos do processo
 export const DEFAULT_PROCESS_STEPS: ProcessStep[] = [
   {

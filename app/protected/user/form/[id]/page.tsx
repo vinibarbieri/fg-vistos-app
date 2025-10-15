@@ -10,6 +10,7 @@ import { FormData, FormProgress, FormAnswer } from "@/types/FormT";
 import { FormStepComponent } from "@/components/form/FormStepComponent";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { apiService } from "@/lib/api-service";
+import { calculateFormProgress, calculateStepProgress } from "@/lib/form-progress";
 
 export default function FormPage() {
   const params = useParams();
@@ -23,6 +24,7 @@ export default function FormPage() {
     completedSteps: [],
     answers: {},
   });
+  const [calculatedProgress, setCalculatedProgress] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -58,6 +60,11 @@ export default function FormPage() {
             ...prev, 
             answers: savedAnswersResponse.data.answers 
           }));
+          
+          // Definir progresso calculado se disponível
+          if (savedAnswersResponse.data.progress) {
+            setCalculatedProgress(savedAnswersResponse.data.progress);
+          }
         }
 
       } catch (error) {
@@ -101,13 +108,22 @@ export default function FormPage() {
 
   // Atualizar resposta
   const updateAnswer = (fieldId: string, value: string | boolean | number | null) => {
+    const newAnswers = {
+      ...formProgress.answers,
+      [fieldId]: value
+    };
+    
     setFormProgress(prev => ({
       ...prev,
-      answers: {
-        ...prev.answers,
-        [fieldId]: value
-      }
+      answers: newAnswers
     }));
+    
+    // Recalcular progresso
+    if (formData) {
+      const progress = calculateFormProgress(formData, newAnswers);
+      setCalculatedProgress(progress);
+    }
+    
     setHasUnsavedChanges(true);
   };
 
@@ -202,7 +218,7 @@ export default function FormPage() {
 
   const currentStep = formData.steps[formProgress.currentStep];
   const isLastStep = formProgress.currentStep >= formData.totalSteps - 1;
-  const progressPercentage = ((formProgress.currentStep + 1) / formData.totalSteps) * 100;
+  const progressPercentage = calculatedProgress?.progressPercentage || ((formProgress.currentStep + 1) / formData.totalSteps) * 100;
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-6">
@@ -226,25 +242,39 @@ export default function FormPage() {
             </div>
             <Progress value={progressPercentage} className="h-2" />
             
+            {/* Informações detalhadas do progresso */}
+            {/* {calculatedProgress && (
+              <div className="text-xs text-muted-foreground">
+                {calculatedProgress.completedFields} de {calculatedProgress.totalFields} campos preenchidos
+                {calculatedProgress.completedSteps > 0 && (
+                  <span> • {calculatedProgress.completedSteps} etapa(s) completa(s)</span>
+                )}
+              </div>
+            )} */}
+            
             {/* Step Indicators */}
             <div className="flex justify-between">
-              {formData.steps.map((step, index) => (
-                <button
-                  key={step.section || `step-${index}`}
-                  onClick={() => goToStep(index)}
-                  className={`flex items-center gap-1 ${
-                    index <= formProgress.currentStep ? 'text-primary' : 'text-muted-foreground'
-                  }`}
-                  disabled={index > formProgress.currentStep && !formProgress.completedSteps.includes(index)}
-                >
-                  {formProgress.completedSteps.includes(index) ? (
-                    <CheckCircle className="h-5" />
-                  ) : (
-                    <Circle className="h-5" />
-                  )}
-                  {/* <span className="hidden sm:inline"></span> */}
-                </button>
-              ))}
+              {formData.steps.map((step, index) => {
+                const stepProgress = calculatedProgress?.stepProgress?.[index];
+                const isPreenchido = stepProgress?.progressPercentage > 0;
+                
+                return (
+                  <button
+                    key={step.section || `step-${index}`}
+                    onClick={() => goToStep(index)}
+                    className={`flex flex-col items-center gap-1 ${
+                      index <= formProgress.currentStep ? 'text-primary' : 'text-muted-foreground'
+                    }`}
+                    disabled={index > formProgress.currentStep && !formProgress.completedSteps.includes(index)}
+                  >
+                    {isPreenchido ? (
+                      <CheckCircle className="h-5 w-5" />
+                    ) : (
+                      <Circle className="h-5 w-5" />
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
         </CardContent>

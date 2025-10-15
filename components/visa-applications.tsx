@@ -8,17 +8,16 @@ import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { User, Edit2, Check, X, Loader2 } from "lucide-react";
-import { Person } from "@/types/process";
+import { ApplicantT } from "@/types/ApplicantT";
 
 interface VisaApplicationsProps {
-  people: Person[];
+  applicants: ApplicantT[];
   onEditName: (personId: string, newName: string) => void;
-  onFillForm: (personId: string) => void;
   editingNames: Set<string>;
 }
 
 interface EditableNameProps {
-  person: Person;
+  person: ApplicantT;
   onSave: (newName: string) => void;
   isLoading: boolean;
 }
@@ -111,19 +110,44 @@ function EditableName({ person, onSave, isLoading }: EditableNameProps) {
 }
 
 export function VisaApplications({
-  people,
+  applicants,
   onEditName,
-  onFillForm,
   editingNames
 }: VisaApplicationsProps) {
   const router = useRouter();
 
-  const getStatusText = (progress: number) => {
-    if (progress === 0) return "Não iniciado";
-    if (progress < 80) return "Em andamento";
-    if (progress < 100) return "Quase completo";
-    return "Completo";
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case "nao_iniciado":
+        return "Não iniciado";
+      case "em_preenchimento":
+        return "Em preenchimento";
+      case "submetido":
+        return "Submetido";
+      case "em_revisao":
+        return "Em revisão";
+      case "aprovado":
+        return "Aprovado";
+      case "rejeitado":
+        return "Rejeitado";
+      default:
+        return "Desconhecido";
+    }
   };
+
+  const getProgressColor = (status: string) => {
+    switch (status) {
+      case "submetido":
+        return "bg-green-500";
+      case "em_revisao":
+        return "bg-green-500";
+      case "aprovado":
+        return "bg-green-500";
+      default:
+        return "bg-primary";
+    }
+  };
+
 
   return (
     <Card>
@@ -140,7 +164,7 @@ export function VisaApplications({
         <div className="space-y-4">
           {/* Grid de Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {people.map((person) => (
+            {applicants.map((person) => (
               <Card key={person.id} className="hover:shadow-md transition-shadow">
                 <CardContent className="p-4">
                   <div className="space-y-3">
@@ -158,11 +182,11 @@ export function VisaApplications({
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">Preenchimento do formulário</span>
-                        <span className="font-medium">{person.progress}%</span>
+                        <span className="font-medium">{person.progress || 0}%</span>
                       </div>
-                      <Progress value={person.progress} className="h-2" />
+                      <Progress value={person.progress || 0} className={getProgressColor(person.form_status || "nao_iniciado")} />
                       <p className="text-xs text-muted-foreground">
-                        {getStatusText(person.progress)}
+                        {getStatusText(person.form_status || "nao_iniciado")}
                       </p>
                     </div>
 
@@ -170,9 +194,9 @@ export function VisaApplications({
                     <Button
                       onClick={() => router.push(`/protected/user/form/${person.id}`)}
                       className="w-full"
-                      variant={person.progress === 0 ? "default" : "outline"}
+                      variant={(person.progress || 0) === 0 ? "default" : "outline"}
                     >
-                      {person.progress === 0 ? "Iniciar Formulário" : "Continuar Formulário"}
+                      {person.form_status === "nao_iniciado" ? "Iniciar Formulário" : person.form_status === "em_preenchimento" ? "Continuar Formulário" : "Editar Formulário"}
                     </Button>
                   </div>
                 </CardContent>
@@ -181,7 +205,7 @@ export function VisaApplications({
           </div>
 
           {/* Mensagem quando não há aplicações */}
-          {people.length === 0 && (
+          {applicants.length === 0 && (
             <div className="text-center py-8">
               <User className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-medium text-muted-foreground mb-2">

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { checkUserRole } from "../../../utils/role-check";
+import { calculateFormProgress } from "@/lib/form-progress";
 
 export async function PUT(
   request: Request,
@@ -81,9 +82,9 @@ export async function PUT(
     // Se o formulário foi marcado como completo, atualizar o status
     if (isComplete) {
       updateData.form_status = 'submetido';
-    } else if (applicant.form_status === 'em_andamento') {
-      // Se era "não iniciado" e agora tem respostas, marcar como "em andamento"
-      updateData.form_status = 'em_andamento';
+    } else if (applicant.form_status === 'em_preenchimento') {
+      // Se era "não iniciado" e agora tem respostas, marcar como "em preenchimento"
+      updateData.form_status = 'em_preenchimento';
     }
 
     // Atualizar o applicant com as respostas
@@ -101,6 +102,47 @@ export async function PUT(
       }, { status: 500 });
     }
 
+    // Buscar dados do formulário para calcular progresso
+    let progressData: any = null;
+    try {
+      const { data: formQuestionsData } = await supabase
+        .from("applicants")
+        .select(`
+          orders!inner(
+            plans!inner(
+              visas!inner(
+                form_questions!inner(
+                  questions
+                )
+              )
+            )
+          )
+        `)
+        .eq("id", applicantId)
+        .single();
+
+      const order = Array.isArray(formQuestionsData?.orders) ? formQuestionsData.orders[0] : formQuestionsData?.orders;
+      const plan = Array.isArray(order?.plans) ? order.plans[0] : order?.plans;
+      const visa = Array.isArray(plan?.visas) ? plan.visas[0] : plan?.visas;
+      const formQuestions = Array.isArray(visa?.form_questions) ? visa.form_questions[0] : visa?.form_questions;
+      
+      if (formQuestions?.questions) {
+        const questions = typeof formQuestions.questions === 'string'
+          ? JSON.parse(formQuestions.questions)
+          : formQuestions.questions;
+
+        const formData = {
+          steps: questions.steps || questions,
+          totalSteps: questions.steps ? questions.steps.length : questions.length
+        };
+
+        progressData = calculateFormProgress(formData, answers);
+      }
+    } catch (progressError) {
+      console.error("Erro ao calcular progresso:", progressError);
+      // Continua sem o progresso se houver erro
+    }
+
     // Retornar dados atualizados
     const response = {
       success: true,
@@ -108,6 +150,7 @@ export async function PUT(
       formStatus: updatedApplicant.form_status,
       savedAt: updatedApplicant.updated_at,
       isComplete,
+      progress: progressData,
       message: isComplete 
         ? "Formulário salvo e marcado como completo!" 
         : "Respostas salvas com sucesso!"
@@ -197,13 +240,55 @@ export async function GET(
       }
     }
 
+    // Buscar dados do formulário para calcular progresso
+    let progressData: any = null;
+    try {
+      const { data: formQuestionsData } = await supabase
+        .from("applicants")
+        .select(`
+          orders!inner(
+            plans!inner(
+              visas!inner(
+                form_questions!inner(
+                  questions
+                )
+              )
+            )
+          )
+        `)
+        .eq("id", applicantId)
+        .single();
+
+      const order = Array.isArray(formQuestionsData?.orders) ? formQuestionsData.orders[0] : formQuestionsData?.orders;
+      const plan = Array.isArray(order?.plans) ? order.plans[0] : order?.plans;
+      const visa = Array.isArray(plan?.visas) ? plan.visas[0] : plan?.visas;
+      const formQuestions = Array.isArray(visa?.form_questions) ? visa.form_questions[0] : visa?.form_questions;
+      
+      if (formQuestions?.questions) {
+        const questions = typeof formQuestions.questions === 'string'
+          ? JSON.parse(formQuestions.questions)
+          : formQuestions.questions;
+
+        const formData = {
+          steps: questions.steps || questions,
+          totalSteps: questions.steps ? questions.steps.length : questions.length
+        };
+
+        progressData = calculateFormProgress(formData, savedAnswers);
+      }
+    } catch (progressError) {
+      console.error("Erro ao calcular progresso:", progressError);
+      // Continua sem o progresso se houver erro
+    }
+
     // Retornar dados das respostas salvas
     const response = {
       applicantId: applicant.id,
       formStatus: applicant.form_status,
       answers: savedAnswers,
       lastSaved: applicant.updated_at,
-      hasAnswers: Object.keys(savedAnswers).length > 0
+      hasAnswers: Object.keys(savedAnswers).length > 0,
+      progress: progressData
     };
 
     return NextResponse.json(response, { status: 200 });

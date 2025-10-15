@@ -27,27 +27,55 @@ export async function GET(request: Request) {
     // Verificar autenticação
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
+      console.log("❌ Erro de autenticação:", authError);
       return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
     }
 
+    console.log("✅ Usuário autenticado:", user.id);
+
     // Verificar permissões - apenas Funcionario e Admin podem ver lista de clientes
     const roleCheck = await checkUserRole(user.id, "Funcionario");
+    console.log("🔍 Verificação de role:", roleCheck);
+    
     if (!roleCheck.hasAccess) {
+      console.log("❌ Permissão insuficiente. Role do usuário:", roleCheck.role);
       return NextResponse.json({ error: "Permissão insuficiente." }, { status: 403 });
     }
 
+    console.log("✅ Permissão concedida. Role:", roleCheck.role);
+
     // Buscar todos os clientes
+    console.log("🔍 Buscando clientes na tabela profiles...");
     const { data: profiles, error: profilesError } = await supabase
       .from("profiles")
       .select("*")
-      .eq("role", "Cliente")
+      .eq("role", "Cliente")  // Buscar por 'Cliente' que é o role correto
       .order("name");
 
     if (profilesError) {
+      console.log("❌ Erro ao buscar profiles:", profilesError);
       return NextResponse.json({ error: profilesError.message }, { status: 500 });
     }
 
+    console.log("📊 Profiles encontrados:", profiles?.length || 0);
+    console.log("📋 Dados dos profiles:", profiles);
+
     if (!profiles || profiles.length === 0) {
+      console.log("⚠️ Nenhum cliente encontrado - verificando se existem profiles com role diferente...");
+      
+      // Debug: verificar todos os profiles para entender a estrutura
+      const { data: allProfiles, error: allProfilesError } = await supabase
+        .from("profiles")
+        .select("id, name, email, role")
+        .order("name");
+      
+      if (allProfilesError) {
+        console.log("❌ Erro ao buscar todos os profiles:", allProfilesError);
+      } else {
+        console.log("📊 Todos os profiles na tabela:", allProfiles);
+        console.log("🔍 Roles únicos encontrados:", [...new Set(allProfiles?.map(p => p.role) || [])]);
+      }
+      
       return NextResponse.json([], { status: 200 });
     }
 

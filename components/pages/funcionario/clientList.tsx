@@ -68,6 +68,8 @@ export function ClientList() {
     }
   };
 
+  console.log(clients);
+
   // Filtrar clientes baseado nos filtros e termo de busca
   const filteredClients = clients.filter((client) => {
     const clientName = `${client.name || ''}`.trim();
@@ -176,9 +178,11 @@ export function ClientList() {
                 onChange={(e) => setFilters(prev => ({ ...prev, statusProcesso: e.target.value }))}
               >
                 <option value="">Todos os status</option>
-                <option value="em_andamento">Em Andamento</option>
-                <option value="submetido">Submetido</option>
-                <option value="em_revisao">Em Revisão</option>
+                <option value="pendente">Pendente</option>
+                <option value="pago">Pago</option>
+                <option value="documentos_enviados">Documentos Enviados</option>
+                <option value="documentos_em_analise">Documentos em Análise</option>
+                <option value="entrevista">Entrevista</option>
                 <option value="aprovado">Aprovado</option>
                 <option value="rejeitado">Rejeitado</option>
               </select>

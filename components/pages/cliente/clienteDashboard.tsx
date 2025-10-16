@@ -13,6 +13,7 @@ import {
 } from "@/lib/api/responsible-api";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { apiService } from "@/lib/api-service";
+import { Loader2 } from "lucide-react";
 
 interface ClienteDashboardProps {
   clientId?: string;
@@ -150,6 +151,7 @@ export function ClienteDashboard({ clientId }: ClienteDashboardProps = {}) {
     return (
       <div className="container mx-auto px-4 py-8 space-y-6">
         <div className="flex flex-col gap-2">
+          <Loader2 className="w-10 h-10 animate-spin mx-auto" />
           <p className="text-center">Carregando...</p>
         </div>
       </div>

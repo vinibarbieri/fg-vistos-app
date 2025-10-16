@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, ArrowRight, Save, CheckCircle, Circle } from "lucide-react";
+import { ArrowLeft, ArrowRight, Save, CheckCircle, Circle, Loader2 } from "lucide-react";
 import { FormData, FormProgress, FormAnswer } from "@/types/FormT";
 import { FormStepComponent } from "@/components/form/FormStepComponent";
 import { useAuth } from "@/lib/hooks/useAuth";
@@ -197,6 +197,7 @@ export default function FormPage() {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col gap-2">
+          <Loader2 className="w-10 h-10 animate-spin mx-auto" />
           <p className="text-center">Carregando formulário...</p>
         </div>
       </div>

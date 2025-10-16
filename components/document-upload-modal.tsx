@@ -13,7 +13,8 @@ import {
   Plus,
   AlertCircle,
   CheckCircle,
-  Loader2
+  Loader2,
+  Download
 } from "lucide-react";
 import { AttachmentsT } from "@/types/AttachmentsT";
 
@@ -161,6 +162,8 @@ export function DocumentUploadModal({
   };
 
   const removeDocument = async (documentId: string, documentType: 'passport' | 'other') => {
+    if (!confirm('Tem certeza que deseja deletar este documento?\nEste processo é irreversível.')) return;
+
     try {
       const response = await fetch(`/api/attachments/${documentId}`, {
         method: 'DELETE',
@@ -193,6 +196,39 @@ export function DocumentUploadModal({
     setUploadingFiles(prev => prev.filter(f => f.id !== fileId));
   };
 
+  const downloadDocument = async (documentId: string, fileName: string) => {
+    try {
+      const response = await fetch(`/api/attachments/${documentId}`, {
+        method: 'GET',
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao baixar documento');
+      }
+
+      // Obter o blob do arquivo
+      const blob = await response.blob();
+      
+      // Criar URL temporária para download
+      const url = window.URL.createObjectURL(blob);
+      
+      // Criar elemento de link temporário para download
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      
+      // Limpar
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+    } catch (error) {
+      console.error('Erro ao baixar documento:', error);
+      alert('Erro ao baixar documento. Tente novamente.');
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -214,26 +250,38 @@ export function DocumentUploadModal({
             </h3>
             
             {passportDocument ? (
-              <Card className="border-green-200 bg-green-50">
+              <Card className="bg-gray-50">
                 <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      {getFileIcon(passportDocument.file_type)}
-                      <div>
-                        <p className="font-medium">{passportDocument.file_name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {formatFileSize(passportDocument.file_size)} • {passportDocument.file_type}
-                        </p>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        {getFileIcon(passportDocument.file_type)}
+                        <div>
+                          <p className="font-medium">{passportDocument.file_name}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {formatFileSize(passportDocument.file_size)} • {passportDocument.file_type}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => downloadDocument(passportDocument.id, passportDocument.file_name)}
+                          title="Baixar documento"
+                        >
+                          <Download className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="hover:bg-primary"
+                          onClick={() => removeDocument(passportDocument.id, 'passport')}
+                          title="Remover documento"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeDocument(passportDocument.id, 'passport')}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
                 </CardContent>
               </Card>
             ) : (
@@ -282,13 +330,25 @@ export function DocumentUploadModal({
                           </p>
                         </div>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeDocument(doc.id, 'other')}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => downloadDocument(doc.id, doc.file_name)}
+                          title="Baixar documento"
+                        >
+                          <Download className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="hover:bg-primary"
+                          onClick={() => removeDocument(doc.id, 'other')}
+                          title="Remover documento"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>

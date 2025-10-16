@@ -7,10 +7,16 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = await createClient();
+    // Usar Service Role Key para bypassar RLS (mesmo que o upload)
+    const supabase = createServiceClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+    
     const { id } = await params;
 
-    const { data, error } = await supabase
+    // Buscar informações do attachment
+    const { data: attachment, error } = await supabase
       .from("attachments")
       .select("*")
       .eq("id", id)
@@ -20,7 +26,32 @@ export async function GET(
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json(data, { status: 200 });
+    if (!attachment.file_path) {
+      return NextResponse.json({ error: "Arquivo não encontrado" }, { status: 404 });
+    }
+
+    // Baixar o arquivo do Supabase Storage usando Service Role
+    const { data: fileData, error: downloadError } = await supabase.storage
+      .from('attachments')
+      .download(attachment.file_path);
+
+    if (downloadError) {
+      console.error('Erro ao baixar arquivo:', downloadError);
+      return NextResponse.json({ error: "Erro ao baixar arquivo" }, { status: 500 });
+    }
+
+    // Converter para ArrayBuffer
+    const arrayBuffer = await fileData.arrayBuffer();
+    
+    // Retornar o arquivo com headers apropriados
+    return new NextResponse(arrayBuffer, {
+      status: 200,
+      headers: {
+        'Content-Type': attachment.file_type || 'application/octet-stream',
+        'Content-Disposition': `attachment; filename="${attachment.file_name}"`,
+        'Content-Length': arrayBuffer.byteLength.toString(),
+      },
+    });
   } catch (error) {
     console.error("Erro ao buscar anexo:", error);
     return NextResponse.json(

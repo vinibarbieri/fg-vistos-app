@@ -282,6 +282,7 @@ export function VisaApplications({
           onClose={handleCloseUploadModal}
           applicantId={selectedApplicantId}
           existingDocuments={applicantDocuments}
+          loadingDocuments={loadingDocuments}
           onDocumentsUpdate={handleDocumentsUpdate}
         />
       )}

@@ -23,6 +23,7 @@ interface DocumentUploadModalProps {
   onClose: () => void;
   applicantId: string;
   existingDocuments: AttachmentsT[];
+  loadingDocuments: boolean;
   onDocumentsUpdate: (documents: AttachmentsT[]) => void;
 }
 
@@ -40,6 +41,7 @@ export function DocumentUploadModal({
   onClose,
   applicantId,
   existingDocuments,
+  loadingDocuments,
   onDocumentsUpdate
 }: DocumentUploadModalProps) {
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
@@ -249,7 +251,15 @@ export function DocumentUploadModal({
               Passaporte (Obrigatório)
             </h3>
             
-            {passportDocument ? (
+            {loadingDocuments ? (
+              <Card className="bg-gray-50">
+                <CardContent className="p-6 text-center">
+                  <Loader2 className="h-8 w-8 text-gray-400 mx-auto mb-2 animate-spin" />
+                  <p className="text-gray-600">Carregando passaporte...</p>
+                </CardContent>
+              </Card>
+            ) : 
+            passportDocument ? (
               <Card className="bg-gray-50">
                 <CardContent className="p-4">
                     <div className="flex items-center justify-between">
@@ -316,8 +326,15 @@ export function DocumentUploadModal({
             </h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {/* Documentos existentes */}
-              {otherDocuments.map((doc) => (
+              {loadingDocuments ? (
+                <Card className="bg-gray-50">
+                  <CardContent className="p-6 text-center">
+                    <Loader2 className="h-8 w-8 text-gray-400 mx-auto mb-2 animate-spin" />
+                    <p className="text-gray-600">Carregando outros documentos...</p>
+                  </CardContent>
+                </Card>
+              ) : 
+              otherDocuments.map((doc) => (
                 <Card key={doc.id} className="hover:shadow-md transition-shadow">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">

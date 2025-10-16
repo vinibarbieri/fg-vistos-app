@@ -240,7 +240,7 @@ export default function FormPage() {
               <span>Etapa {formProgress.currentStep + 1} de {formData.totalSteps}</span>
               <span>{Math.round(progressPercentage)}% completo</span>
             </div>
-            <Progress value={progressPercentage} className="h-2" />
+            <Progress value={progressPercentage} className="h-3" />
             
             {/* Informações detalhadas do progresso */}
             {/* {calculatedProgress && (

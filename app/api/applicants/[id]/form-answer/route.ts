@@ -82,7 +82,7 @@ export async function PUT(
     // Se o formulário foi marcado como completo, atualizar o status
     if (isComplete) {
       updateData.form_status = 'submetido';
-    } else if (applicant.form_status === 'em_preenchimento') {
+    } else if (applicant.form_status === 'nao_iniciado') {
       // Se era "não iniciado" e agora tem respostas, marcar como "em preenchimento"
       updateData.form_status = 'em_preenchimento';
     }

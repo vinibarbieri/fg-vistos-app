@@ -50,7 +50,8 @@ export function DocumentUploadModal({
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const passportInputRef = useRef<HTMLInputElement>(null);
-
+  const [loadingDeletePassportDocument, setLoadingDeletePassportDocument] = useState(false);
+  const [loadingDeleteOtherDocument, setLoadingDeleteOtherDocument] = useState(false);
   // Separar documentos existentes
   useEffect(() => {
     const passport = existingDocuments.find(doc => doc.document_type === 'passport');
@@ -146,7 +147,7 @@ export function DocumentUploadModal({
       // Notificar componente pai
       const updatedDocuments = uploadingFile.documentType === 'passport' 
         ? [result.document, ...otherDocuments]
-        : [...otherDocuments, result.document];
+        : [passportDocument, ...otherDocuments, result.document].filter(doc => doc !== null);
       onDocumentsUpdate(updatedDocuments);
 
     } catch (error) {
@@ -165,6 +166,11 @@ export function DocumentUploadModal({
 
   const removeDocument = async (documentId: string, documentType: 'passport' | 'other') => {
     if (!confirm('Tem certeza que deseja deletar este documento?\nEste processo é irreversível.')) return;
+    if (documentType === 'passport') {
+      setLoadingDeletePassportDocument(true);
+    } else {
+      setLoadingDeleteOtherDocument(true);
+    }
 
     try {
       const response = await fetch(`/api/attachments/${documentId}`, {
@@ -185,12 +191,15 @@ export function DocumentUploadModal({
       // Notificar componente pai
       const updatedDocuments = documentType === 'passport'
         ? otherDocuments
-        : otherDocuments.filter(doc => doc.id !== documentId);
+        : [passportDocument, ...otherDocuments.filter(doc => doc.id !== documentId)].filter(doc => doc !== null);
       onDocumentsUpdate(updatedDocuments);
 
     } catch (error) {
       console.error('Erro ao remover documento:', error);
       alert('Erro ao remover documento. Tente novamente.');
+    } finally {
+      setLoadingDeletePassportDocument(false);
+      setLoadingDeleteOtherDocument(false);
     }
   };
 
@@ -242,6 +251,7 @@ export function DocumentUploadModal({
             <X className="h-4 w-4" />
           </Button>
         </CardHeader>
+
         
         <CardContent className="space-y-6">
           {/* Seção do Passaporte */}
@@ -251,7 +261,7 @@ export function DocumentUploadModal({
               Passaporte (Obrigatório)
             </h3>
             
-            {loadingDocuments ? (
+            {loadingDocuments || loadingDeletePassportDocument ? (
               <Card className="bg-gray-50">
                 <CardContent className="p-6 text-center">
                   <Loader2 className="h-8 w-8 text-gray-400 mx-auto mb-2 animate-spin" />
@@ -288,7 +298,6 @@ export function DocumentUploadModal({
                           onClick={() => removeDocument(passportDocument.id, 'passport')}
                           title="Remover documento"
                         >
-                          <X className="h-4 w-4" />
                         </Button>
                       </div>
                     </div>
@@ -325,8 +334,8 @@ export function DocumentUploadModal({
               Outros Documentos
             </h3>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {loadingDocuments ? (
+            <div className="flex flex-col gap-3">
+              {loadingDocuments || loadingDeleteOtherDocument ? (
                 <Card className="bg-gray-50">
                   <CardContent className="p-6 text-center">
                     <Loader2 className="h-8 w-8 text-gray-400 mx-auto mb-2 animate-spin" />
@@ -335,7 +344,7 @@ export function DocumentUploadModal({
                 </Card>
               ) : 
               otherDocuments.map((doc) => (
-                <Card key={doc.id} className="hover:shadow-md transition-shadow">
+                <Card key={doc.id} className="hover:shadow-md transition-shadow bg-gray-50">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">

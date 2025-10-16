@@ -78,6 +78,9 @@ export function ClientList() {
     const matchesStatus = !filters.statusCliente || 
       client.account_status === filters.statusCliente;
 
+    const matchesStatusProcesso = !filters.statusProcesso ||
+      client.status_processo?.toLowerCase() === filters.statusProcesso.toLowerCase();
+
     const matchesCity = !filters.city ||
       client.interview_city?.toLowerCase().includes(filters.city.toLowerCase());
 
@@ -87,7 +90,7 @@ export function ClientList() {
     const matchesCountry = !filters.country ||
       client.country?.toLowerCase().includes(filters.country.toLowerCase());
 
-    return matchesSearch && matchesStatus && matchesCity && matchesVisaType && matchesCountry;
+    return matchesSearch && matchesStatus && matchesStatusProcesso && matchesCity && matchesVisaType && matchesCountry;
   });
 
   const handleClientClick = (clientId: string) => {
@@ -96,11 +99,15 @@ export function ClientList() {
 
   const getStatusColor = (status: string | undefined) => {
     switch (status) {
-      case "em_andamento":
+      case "pendente":
+        return "outline";
+      case "pago":
         return "secondary";
-      case "submetido":
+      case "documentos_enviados":
         return "secondary";
-      case "em_revisao":
+      case "documentos_em_analise":
+        return "secondary";
+      case "entrevista":
         return "secondary";
       case "aprovado":
         return "default";
@@ -113,12 +120,16 @@ export function ClientList() {
 
   const getStatusText = (status: string | undefined) => {
     switch (status) {
-      case "em_andamento":
-        return "Em Andamento";
-      case "submetido":
-        return "Submetido";
-      case "em_revisao":
-        return "Em Revisão";
+      case "pendente":
+        return "Pendente";
+      case "pago":
+        return "Pago";
+      case "documentos_enviados":
+        return "Documentos Enviados";
+      case "documentos_em_analise":
+        return "Documentos em Análise";
+      case "entrevista":
+        return "Entrevista";
       case "aprovado":
         return "Aprovado";
       case "rejeitado":
@@ -176,9 +187,11 @@ export function ClientList() {
                 onChange={(e) => setFilters(prev => ({ ...prev, statusProcesso: e.target.value }))}
               >
                 <option value="">Todos os status</option>
-                <option value="em_andamento">Em Andamento</option>
-                <option value="submetido">Submetido</option>
-                <option value="em_revisao">Em Revisão</option>
+                <option value="pendente">Pendente</option>
+                <option value="pago">Pago</option>
+                <option value="documentos_enviados">Documentos Enviados</option>
+                <option value="documentos_em_analise">Documentos em Análise</option>
+                <option value="entrevista">Entrevista</option>
                 <option value="aprovado">Aprovado</option>
                 <option value="rejeitado">Rejeitado</option>
               </select>
@@ -193,12 +206,10 @@ export function ClientList() {
                 onChange={(e) => setFilters(prev => ({ ...prev, visaType: e.target.value }))}
               >
                 <option value="">Todos os tipos</option>
-                {clients.map((client) => (
-                  client.visa_name !== "Não informado" && (
-                  <option key={client.visa_name} value={client.visa_name}>
-                    {client.visa_name}
+                {[...new Set(clients.map(c => c.visa_name))].map((visaType) => (
+                  <option key={visaType} value={visaType}>
+                    {visaType}
                   </option>
-                  )
                 ))}
               </select>
             </div>
@@ -212,12 +223,10 @@ export function ClientList() {
                 onChange={(e) => setFilters(prev => ({ ...prev, country: e.target.value }))}
               >
                 <option value="">Todos os países</option>
-                {clients.map((client) => (
-                  client.country !== "Não informado" && (
-                    <option key={client.country} value={client.country}>
-                      {client.country}
-                    </option>
-                  )
+                {[...new Set(clients.map(c => c.country))].map((country) => (
+                  <option key={country} value={country}>
+                    {country}
+                  </option>
                 ))}
               </select>
             </div>

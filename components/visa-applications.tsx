@@ -239,7 +239,7 @@ export function VisaApplications({
                     <Button
                       onClick={() => router.push(`/protected/user/form/${person.id}`)}
                       className="w-full"
-                      variant={person.form_status === "nao_iniciado" ? "default" : person.form_status === "em_preenchimento" ? "default" : "outline"}
+                      variant={person.form_status === "nao_iniciado" ? "default" : person.form_status === "em_preenchimento" ? "default" : "secondary"}
                     >
                       {person.form_status === "nao_iniciado" ? "Iniciar Formulário" : person.form_status === "em_preenchimento" ? "Continuar Formulário" : "Editar Formulário"}
                     </Button>

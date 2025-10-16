@@ -62,9 +62,9 @@ export function DocumentUploadModal({
   }, [existingDocuments]);
 
   const getFileIcon = (fileType: string) => {
-    if (fileType === 'application/pdf') return <FileText className="h-8 w-8 text-red-500" />;
-    if (fileType.includes('image/')) return <Image className="h-8 w-8 text-blue-500" />;
-    return <FileImage className="h-8 w-8 text-gray-500" />;
+    if (fileType === 'application/pdf') return <FileText className="h-6 w-6 text-red-500 flex-shrink-0" />;
+    if (fileType.includes('image/')) return <Image className="h-6 w-6 text-blue-500 flex-shrink-0" />;
+    return <FileImage className="h-6 w-6 text-gray-500 flex-shrink-0" />;
   };
 
   const formatFileSize = (bytes: number) => {
@@ -264,7 +264,7 @@ export function DocumentUploadModal({
             {loadingDocuments || loadingDeletePassportDocument ? (
               <Card className="bg-gray-50">
                 <CardContent className="p-6 text-center">
-                  <Loader2 className="h-8 w-8 text-gray-400 mx-auto mb-2 animate-spin" />
+                  <Loader2 className="h-8 w-8 text-gray-400 mx-auto mb-2 animate-spin flex-shrink-0" />
                   <p className="text-gray-600">Carregando passaporte...</p>
                 </CardContent>
               </Card>
@@ -272,17 +272,17 @@ export function DocumentUploadModal({
             passportDocument ? (
               <Card className="bg-gray-50">
                 <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between gap-1">
                       <div className="flex items-center gap-3">
                         {getFileIcon(passportDocument.file_type)}
                         <div>
-                          <p className="font-medium">{passportDocument.file_name}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {formatFileSize(passportDocument.file_size)} • {passportDocument.file_type}
+                          <p className="font-medium text-sm sm:text-base">{passportDocument.file_name}</p>
+                          <p className="text-xs sm:text-sm text-muted-foreground">
+                            {formatFileSize(passportDocument.file_size)}
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center sm:gap-2">
                         <Button
                           variant="ghost"
                           size="sm"
@@ -298,6 +298,7 @@ export function DocumentUploadModal({
                           onClick={() => removeDocument(passportDocument.id, 'passport')}
                           title="Remover documento"
                         >
+                          <X className="h-4 w-4" />
                         </Button>
                       </div>
                     </div>
@@ -306,7 +307,7 @@ export function DocumentUploadModal({
             ) : (
               <Card className="border-dashed border-2 border-gray-300 hover:border-gray-400 transition-colors">
                 <CardContent className="p-6 text-center">
-                  <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <Upload className="md:h-12 md:w-12 h-8 w-8 text-gray-400 mx-auto mb-4" />
                   <p className="text-gray-600 mb-4">Nenhum passaporte enviado</p>
                   <Button
                     onClick={() => passportInputRef.current?.click()}
@@ -349,9 +350,9 @@ export function DocumentUploadModal({
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         {getFileIcon(doc.file_type)}
-                        <div className="min-w-0 flex-1">
-                          <p className="font-medium truncate">{doc.file_name}</p>
-                          <p className="text-sm text-muted-foreground">
+                        <div className="">
+                          <p className="font-medium text-sm sm:text-base">{doc.file_name}</p>
+                          <p className="text-xs sm:text-sm text-muted-foreground">
                             {formatFileSize(doc.file_size)}
                           </p>
                         </div>
@@ -391,7 +392,7 @@ export function DocumentUploadModal({
                           <div className="flex items-center gap-3">
                             {getFileIcon(uploadingFile.file.type)}
                             <div className="min-w-0 flex-1">
-                              <p className="font-medium truncate">{uploadingFile.file.name}</p>
+                              <p className="font-medium">{uploadingFile.file.name}</p>
                               <p className="text-sm text-muted-foreground">
                                 {formatFileSize(uploadingFile.file.size)}
                               </p>
@@ -434,7 +435,7 @@ export function DocumentUploadModal({
               {/* Botão para adicionar novo documento */}
               <Card className="border-dashed border-2 border-gray-300 hover:border-gray-400 transition-colors">
                 <CardContent className="p-6 text-center">
-                  <Plus className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                  <Plus className="md:h-8 md:w-8 h-6 w-6 text-gray-400 mx-auto mb-2" />
                   <p className="text-sm text-gray-600 mb-3">Adicionar documento</p>
                   <Button
                     variant="outline"

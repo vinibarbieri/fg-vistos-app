@@ -22,36 +22,31 @@ export interface Responsible {
 export const DEFAULT_PROCESS_STEPS: ProcessStep[] = [
   {
     step: 1,
-    title: "Pago",
-    description: "Pagamento confirmado",
+    title: "Pagamento",
     completed: false,
     order: 1
   },
   {
     step: 2,
-    title: "Documentos Enviados",
-    description: "Documentação submetida",
+    title: "Envio da Documentação",
     completed: false,
     order: 2
   },
   {
     step: 3,
-    title: "Documentos em Análise",
-    description: "Em revisão pela equipe",
+    title: "Análise dos Documentos",
     completed: false,
     order: 3
   },
   {
     step: 4,
-    title: "Entrevista Marcada",
-    description: "Agendamento pendente",
+    title: "Entrevista",
     completed: false,
     order: 4
   },
   {
     step: 5,
-    title: "Visto Aprovado",
-    description: "Processo finalizado",
+    title: "Visto",
     completed: false,
     order: 5
   }
@@ -108,5 +103,54 @@ export function getProcessStatusInfo(status: string) {
         color: "bg-yellow-500", 
         description: "Processo em andamento" 
       };
+  }
+}
+
+// Função para obter descrições dinâmicas dos steps baseado no status atual
+export function getStepDescription(step: ProcessStep, currentStepIndex: number, stepIndex: number): string {
+  const stepNumber = stepIndex + 1;
+  
+  // Se o step está completo, mostra status de concluído
+  if (step.completed) {
+    switch (stepNumber) {
+      case 1:
+        return "Confirmado";
+      case 2:
+        return "Enviada";
+      case 3:
+        return "Concluída";
+      case 4:
+        return "Realizada";
+      case 5:
+        return "Aprovado";
+      default:
+        return "Concluído";
+    }
+  }
+  
+  // Se é o step atual, mostra status em andamento
+  if (stepNumber === currentStepIndex) {
+    switch (stepNumber) {
+      case 1:
+        return "Aguardando pagamento";
+      case 2:
+        return "Aguardando documentos";
+      case 3:
+        return "Em análise pela equipe";
+      case 4:
+        return "Entrevista marcada";
+      case 5:
+        return "Visto aprovado";
+      default:
+        return "Em andamento";
+    }
+  }
+  
+  // Se é um step futuro, mostra status pendente
+  switch (stepNumber) {
+    case 1:
+      return "Pagamento pendente";
+    default:
+      return "Pendente";
   }
 } 

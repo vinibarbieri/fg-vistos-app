@@ -10,10 +10,6 @@ import {
   getResponsibleApplicationsAPI, 
   updateApplicantNameAPI,
   getFormStatusProgress,
-  getFormStatusInfo
-} from "@/lib/api/responsible-api";
-import { 
-  getProcessStatusAPI
 } from "@/lib/api/responsible-api";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { apiService } from "@/lib/api-service";
@@ -25,6 +21,7 @@ interface ClienteDashboardProps {
 export function ClienteDashboard({ clientId }: ClienteDashboardProps = {}) {
   const { user, loading: authLoading, userId } = useAuth();
   const [applicants, setApplicants] = useState<ApplicantT[]>([]);
+  const [statusProcesso, setStatusProcesso] = useState<string>("");
   const [responsibleData, setResponsibleData] = useState<{ name: string; email: string } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [editingNames, setEditingNames] = useState<Set<string>>(new Set());
@@ -71,10 +68,8 @@ export function ClienteDashboard({ clientId }: ClienteDashboardProps = {}) {
         
         setApplicants(finalApplicants);
         
-        // Buscar status do processo
-        const status = await getProcessStatusAPI(targetUserId);
         // Atualizar passos do processo baseado no status
-        updateProcessSteps(status);
+        updateProcessSteps(finalApplicants[0].status);
 
       } catch (error) {
         console.error("Erro ao carregar dados:", error);
@@ -164,10 +159,10 @@ export function ClienteDashboard({ clientId }: ClienteDashboardProps = {}) {
   return (
     <div className="container mx-auto px-4 py-8 space-y-6">
       {/* Header da página */}
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col items-center justify-center gap-2">
         <h1 className="text-3xl font-bold">Acompanhe o seu processo</h1>
-        <p className="text-muted-foreground">
-          Bem-vindo ao sistema da FG Vistos. Acompanhe o progresso do seu processo.
+        <p className="text-muted-foreground text-center">
+          Seu visto está sendo processado. Acompanhe o progresso aqui.
         </p>
       </div>
 

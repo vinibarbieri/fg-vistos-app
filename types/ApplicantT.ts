@@ -1,10 +1,10 @@
 import { AttachmentsT } from "./Attachments";
 import { OrderT } from "./OrderT";
-import { UserT } from "./ProfilesT";
+import { ProfilesT } from "./ProfilesT";
 
 export type ApplicantT = {
     id: string;
-    resposible_user_id: UserT["id"];
+    resposible_user_id: ProfilesT["id"];
     order_id: OrderT["id"];
     is_responsible: boolean;
     name: string;
@@ -14,4 +14,8 @@ export type ApplicantT = {
     from_answer: string;
     form_status: string;
     attachment_id: AttachmentsT["id"];
+    /**
+     * @description Progresso do formulário - Não existe no banco de dados, é calculado no frontend
+     */
+    progress?: number;
 }

@@ -78,39 +78,16 @@ export async function getProcessStatusAPI(userId: string): Promise<string> {
   try {
     // Por enquanto, vamos calcular baseado nas aplicações
     const applications = await getResponsibleApplicationsAPI(userId);
-    
     if (!applications || applications.length === 0) {
-      return 'pending';
+      return 'pendente';
     }
-    
-    // Determinar status geral baseado nos status dos aplicantes
-    const statuses = applications.map(a => a.status);
-    
-    // Se todos estão aprovados, processo está completo
-    if (statuses.every(s => s === 'approved')) {
-      return 'completed';
-    }
-    
-    // Se algum foi rejeitado, processo falhou
-    if (statuses.some(s => s === 'rejected')) {
-      return 'rejected';
-    }
-    
-    // Se algum está em análise, processo está em andamento
-    if (statuses.some(s => s === 'reviewing')) {
-      return 'reviewing';
-    }
-    
-    // Se algum foi enviado, processo está em análise
-    if (statuses.some(s => s === 'submitted')) {
-      return 'submitted';
-    }
-    
-    // Padrão: em andamento
-    return 'in_progress';
+    const applicantResponsavel = applications.filter(a => a.is_responsible);
+    const status = applicantResponsavel.status;
+    return status;
+
   } catch (error) {
     console.error('Erro ao buscar status do processo:', error);
-    return 'pending';
+    return 'pendente';
   }
 }
 

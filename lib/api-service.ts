@@ -654,6 +654,73 @@ class ApiService {
     }
   }
 
+  // Método para buscar form_questions por applicant
+  async getFormQuestionsByApplicant(applicantId: string): Promise<ApiResponse<any>> {
+    try {
+      const response = await fetch(`/api/applicants/${applicantId}/form-questions`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return { error: data.error || 'Erro ao buscar formulário', status: response.status };
+      }
+
+      return { data, status: 200 };
+    } catch (error) {
+      return { error: "Erro ao buscar formulário do applicant", status: 500 };
+    }
+  }
+
+  // Método para salvar respostas do formulário
+  async saveFormAnswers(applicantId: string, answers: any, isComplete: boolean = false): Promise<ApiResponse<any>> {
+    try {
+      const response = await fetch(`/api/applicants/${applicantId}/form-answer`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ answers, isComplete }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return { error: data.error || 'Erro ao salvar respostas', status: response.status };
+      }
+
+      return { data, status: 200 };
+    } catch (error) {
+      return { error: "Erro ao salvar respostas do formulário", status: 500 };
+    }
+  }
+
+  // Método para carregar respostas salvas do formulário
+  async getFormAnswers(applicantId: string): Promise<ApiResponse<any>> {
+    try {
+      const response = await fetch(`/api/applicants/${applicantId}/form-answer`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return { error: data.error || 'Erro ao carregar respostas', status: response.status };
+      }
+
+      return { data, status: 200 };
+    } catch (error) {
+      return { error: "Erro ao carregar respostas do formulário", status: 500 };
+    }
+  }
+
   // Métodos para respostas de formulário
   async submitFormResponse(
     response: Partial<FormResponse>

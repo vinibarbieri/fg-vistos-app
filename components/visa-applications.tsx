@@ -1,14 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { User, Edit2, Check, X, Loader2 } from "lucide-react";
+import { User, Edit2, Check, X, Loader2, Upload } from "lucide-react";
 import { ApplicantT } from "@/types/ApplicantT";
+import { AttachmentsT } from "@/types/AttachmentsT";
+import { DocumentUploadModal } from "@/components/document-upload-modal";
 
 interface VisaApplicationsProps {
   applicants: ApplicantT[];
@@ -115,6 +117,49 @@ export function VisaApplications({
   editingNames
 }: VisaApplicationsProps) {
   const router = useRouter();
+  const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const [selectedApplicantId, setSelectedApplicantId] = useState<string | null>(null);
+  const [applicantDocuments, setApplicantDocuments] = useState<AttachmentsT[]>([]);
+  const [loadingDocuments, setLoadingDocuments] = useState(false);
+
+  // Carregar documentos de um aplicante
+  const loadApplicantDocuments = async (applicantId: string) => {
+    try {
+      setLoadingDocuments(true);
+      const response = await fetch(`/api/attachments/list?applicantId=${applicantId}`);
+      
+      if (!response.ok) {
+        throw new Error('Erro ao carregar documentos');
+      }
+      
+      const data = await response.json();
+      setApplicantDocuments(data.documents || []);
+    } catch (error) {
+      console.error('Erro ao carregar documentos:', error);
+      setApplicantDocuments([]);
+    } finally {
+      setLoadingDocuments(false);
+    }
+  };
+
+  // Abrir modal de upload
+  const handleOpenUploadModal = async (applicantId: string) => {
+    setSelectedApplicantId(applicantId);
+    setUploadModalOpen(true);
+    await loadApplicantDocuments(applicantId);
+  };
+
+  // Fechar modal
+  const handleCloseUploadModal = () => {
+    setUploadModalOpen(false);
+    setSelectedApplicantId(null);
+    setApplicantDocuments([]);
+  };
+
+  // Atualizar documentos após upload/remoção
+  const handleDocumentsUpdate = (documents: AttachmentsT[]) => {
+    setApplicantDocuments(documents);
+  };
 
   const getStatusText = (status: string) => {
     switch (status) {
@@ -198,6 +243,17 @@ export function VisaApplications({
                     >
                       {person.form_status === "nao_iniciado" ? "Iniciar Formulário" : person.form_status === "em_preenchimento" ? "Continuar Formulário" : "Editar Formulário"}
                     </Button>
+
+                    {/* Botão de Enviar Documentos */}
+                    <Button
+                      onClick={() => handleOpenUploadModal(person.id)}
+                      variant="outline"
+                      className="w-full"
+                      disabled={loadingDocuments}
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      {loadingDocuments ? "Carregando..." : "Enviar Documentos"}
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -218,6 +274,17 @@ export function VisaApplications({
           )}
         </div>
       </CardContent>
+
+      {/* Modal de Upload de Documentos */}
+      {selectedApplicantId && (
+        <DocumentUploadModal
+          isOpen={uploadModalOpen}
+          onClose={handleCloseUploadModal}
+          applicantId={selectedApplicantId}
+          existingDocuments={applicantDocuments}
+          onDocumentsUpdate={handleDocumentsUpdate}
+        />
+      )}
     </Card>
   );
 } 

@@ -224,11 +224,9 @@ export default function FormPage() {
   return (
     <div className="container mx-auto px-4 py-8 space-y-6">
       {/* Header */}
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center gap-2">
-        </div>
+      <div className="flex flex-col gap-2 justify-center items-center sm:justify-start sm:items-start">
         <h1 className="text-3xl font-bold">Formulário de Aplicação</h1>
-        <p className="text-muted-foreground">
+        <p className="text-muted-foreground text-center">
           Preencha todas as informações necessárias para sua aplicação de visto
         </p>
       </div>

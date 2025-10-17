@@ -15,7 +15,6 @@ export async function middleware(request: NextRequest) {
 
   // ## 1. Proteção das Rotas da API ##
   const protectedApiRoutes = [
-    "/api/site-backend/order",
     "/api/site-backend/payments/create-checkout",
     "/api/site-backend/payments/check-status",
   ];
@@ -23,6 +22,13 @@ export async function middleware(request: NextRequest) {
   const isProtectedApiRoute = protectedApiRoutes.some((route) =>
     pathname.startsWith(route)
   );
+
+  // Permitir requisições OPTIONS (preflight) mesmo sem autenticação
+  if (request.method === "OPTIONS") {
+    return new NextResponse(null, {
+      status: 200,
+    });
+  }
 
   if (isProtectedApiRoute && !user) {
     // Para rotas de API, é essencial retornar um erro JSON em vez de um redirecionamento.

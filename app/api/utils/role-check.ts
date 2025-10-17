@@ -4,7 +4,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 
-export type UserRole = "Cliente" | "Funcionario" | "Admin";
+export type UserRole = "cliente" | "funcionario" | "admin";
 
 export interface RoleCheckResult {
   hasAccess: boolean;
@@ -13,7 +13,7 @@ export interface RoleCheckResult {
 }
 
 /**
- * Verifica se o usuário tem permissão para acessar recursos
+ * Verifica se o usuário tem permissão para acessar recursos usando JWT
  * @param userId ID do usuário autenticado
  * @param requiredRole Role mínimo necessário (opcional)
  * @returns Resultado da verificação de permissão
@@ -22,21 +22,26 @@ export async function checkUserRole(userId: string, requiredRole?: UserRole): Pr
   try {
     const supabase = await createClient();
     
-    const { data: profile, error } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", userId)
-      .single();
+    // Buscar o usuário para obter o role do JWT
+    const { data: { user }, error } = await supabase.auth.getUser();
     
-    if (error || !profile) {
+    if (error || !user) {
       return {
         hasAccess: false,
         role: null,
-        error: "Perfil não encontrado"
+        error: "Usuário não encontrado"
       };
     }
     
-    const userRole = profile.role as UserRole;
+    const userRole = user.app_metadata?.user_role as UserRole;
+    
+    if (!userRole) {
+      return {
+        hasAccess: false,
+        role: null,
+        error: "Role não encontrado no JWT"
+      };
+    }
     
     // Se não especificar role necessário, qualquer role autenticado tem acesso
     if (!requiredRole) {
@@ -48,9 +53,9 @@ export async function checkUserRole(userId: string, requiredRole?: UserRole): Pr
     
     // Verificar hierarquia de roles
     const roleHierarchy: Record<UserRole, number> = {
-      "Cliente": 1,
-      "Funcionario": 2,
-      "Admin": 3
+      "cliente": 1,
+      "funcionario": 2,
+      "admin": 3
     };
     
     const hasAccess = roleHierarchy[userRole] >= roleHierarchy[requiredRole];
@@ -84,7 +89,7 @@ export async function canAccessUserData(userId: string, targetUserId: string): P
   }
   
   // Cliente só pode acessar seus próprios dados
-  if (roleCheck.role === "Cliente") {
+  if (roleCheck.role === "cliente") {
     return userId === targetUserId;
   }
   
@@ -106,7 +111,7 @@ export async function canEditUserData(userId: string, targetUserId: string): Pro
   }
   
   // Cliente só pode editar seus próprios dados
-  if (roleCheck.role === "Cliente") {
+  if (roleCheck.role === "cliente") {
     return userId === targetUserId;
   }
   

@@ -5,12 +5,10 @@ import { useRouter } from "next/navigation";
 import { AdminDashboard } from "../pages/admin/adminDashboard";
 import { apiService } from "@/lib/api-service";
 import { FuncionarioDashboard } from "../pages/funcionario/funcionarioDashboard";
-import { ProfilesT } from "@/types/ProfilesT";
 import { getRedirectUrlByRole } from "@/lib/auth-redirect";
 
 export function AuthGuard() {
   const [user, setUser] = useState<any>(null);
-  const [profile, setProfile] = useState<ProfilesT | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
@@ -30,21 +28,19 @@ export function AuthGuard() {
 
       setUser(currentUser);
 
-      // Buscar o perfil do usuário para determinar o papel
-      const profileResponse = await apiService.getProfile(currentUser.id);
-
-      if (profileResponse.error || !profileResponse.data) {
-        console.error("Erro ao buscar perfil:", profileResponse.error);
-        // Se não encontrar perfil, redirecionar para criar um
+      // Obter o role do JWT
+      const userRole = currentUser.app_metadata?.user_role;
+      
+      if (!userRole) {
+        console.error("Erro ao buscar role do usuário:", userRole);
+        // Se não encontrar role, redirecionar para criar um perfil
         router.push("/auth/sign-up");
         return;
       }
 
-      setProfile(profileResponse.data);
-
       // Redirecionar automaticamente baseado no role se não estiver na página correta
       const currentPath = window.location.pathname;
-      const expectedPath = getRedirectUrlByRole(profileResponse.data);
+      const expectedPath = getRedirectUrlByRole(userRole);
       
       // Se não estiver na página correta, redirecionar
       if (currentPath !== expectedPath && !currentPath.startsWith('/protected/user')) {
@@ -67,14 +63,16 @@ export function AuthGuard() {
     );
   }
 
-  if (!user || !profile) {
+  if (!user) {
     return null;
   }
+
+  const userRole = user.app_metadata?.user_role;
 
   return (
     <div className="min-h-screen bg-background">
       <main>
-        {profile.role === "Admin" ? (
+        {userRole === "admin" ? (
           <AdminDashboard />
         ) : (
           <FuncionarioDashboard />

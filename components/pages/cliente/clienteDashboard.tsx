@@ -165,7 +165,7 @@ export function ClienteDashboard({ clientId }: ClienteDashboardProps = {}) {
   };
 
   // Verificar se o usuário é funcionário ou admin
-  const isStaff = userRole === "Funcionario" || userRole === "Admin";
+  const isStaff = userRole === "funcionario" || userRole === "admin";
 
 
 

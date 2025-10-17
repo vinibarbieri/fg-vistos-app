@@ -3,12 +3,10 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { apiService } from "@/lib/api-service";
-import { ProfilesT } from "@/types/ProfilesT";
 import { Navbar } from "./Navbar";
 
 export function GlobalNav() {
   const [user, setUser] = useState<any>(null);
-  const [profile, setProfile] = useState<ProfilesT | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const pathname = usePathname();
 
@@ -23,26 +21,13 @@ export function GlobalNav() {
 
       if (!currentUser) {
         setUser(null);
-        setProfile(null);
         return;
       }
 
       setUser(currentUser);
-
-      // Buscar o perfil do usuário
-      const profileResponse = await apiService.getProfile(currentUser.id);
-
-      if (profileResponse.error || !profileResponse.data) {
-        console.error("Erro ao buscar perfil:", profileResponse.error);
-        setProfile(null);
-        return;
-      }
-
-      setProfile(profileResponse.data);
     } catch (error) {
       console.error("Erro ao verificar usuário:", error);
       setUser(null);
-      setProfile(null);
     } finally {
       setIsLoading(false);
     }
@@ -53,14 +38,16 @@ export function GlobalNav() {
   const isAuthPage = authPages.some(page => pathname.startsWith(page));
 
   // Não mostrar navbar se estiver carregando ou se for página de auth
-  if (isLoading || isAuthPage || !user || !profile) {
+  if (isAuthPage || !user) {
     return null;
   }
 
+  const userRole = user.app_metadata?.user_role;
+
   return (
     <Navbar 
-      userRole={profile.role} 
-      userName={profile.name} 
+      userRole={userRole} 
+      userName={user.user_metadata?.name || user.email} 
       userEmail={user.email} 
     />
   );

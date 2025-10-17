@@ -70,7 +70,7 @@ export function ProcessInfo({
       }
     };
 
-    const isStaff = userRole === "Funcionario" || userRole === "Admin";
+    const isStaff = userRole === "funcionario" || userRole === "admin";
 
   return (
     <Card>

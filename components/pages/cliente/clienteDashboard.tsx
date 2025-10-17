@@ -10,19 +10,21 @@ import {
   getResponsibleApplicationsAPI, 
   updateApplicantNameAPI,
   getFormStatusProgress,
+  deleteApplicantAPI,
+  updateApplicantFormStatusAPI,
 } from "@/lib/api/responsible-api";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { apiService } from "@/lib/api-service";
 import { Loader2 } from "lucide-react";
+import { updateProcessSteps } from "@/utils/updateProcessSteps";
 
 interface ClienteDashboardProps {
   clientId?: string;
 }
 
 export function ClienteDashboard({ clientId }: ClienteDashboardProps = {}) {
-  const { user, loading: authLoading, userId } = useAuth();
+  const { loading: authLoading, userId, userRole } = useAuth();
   const [applicants, setApplicants] = useState<ApplicantT[]>([]);
-  const [statusProcesso, setStatusProcesso] = useState<string>("");
   const [responsibleData, setResponsibleData] = useState<{ name: string; email: string } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [editingNames, setEditingNames] = useState<Set<string>>(new Set());
@@ -70,7 +72,9 @@ export function ClienteDashboard({ clientId }: ClienteDashboardProps = {}) {
         setApplicants(finalApplicants);
         
         // Atualizar passos do processo baseado no status
-        updateProcessSteps(finalApplicants[0].status);
+        if (finalApplicants.length > 0) {
+          setProcessSteps(updateProcessSteps(finalApplicants[0].status));
+        }
 
       } catch (error) {
         console.error("Erro ao carregar dados:", error);
@@ -82,36 +86,6 @@ export function ClienteDashboard({ clientId }: ClienteDashboardProps = {}) {
     loadData();
   }, [targetUserId]);
 
-  // Atualizar passos do processo baseado no status
-  const updateProcessSteps = (status: string) => {
-    const newSteps = [...DEFAULT_PROCESS_STEPS];
-    
-    switch (status) {
-      case 'rejeitado':
-        newSteps.forEach(step => step.completed = true);
-        break;
-      case 'aprovado':
-        newSteps.forEach(step => step.completed = true);
-        break;
-      case 'entrevista':
-        newSteps.slice(0, 4).forEach(step => step.completed = true);
-        break;
-      case 'documentos_em_analise':
-        newSteps.slice(0, 3).forEach(step => step.completed = true);
-        break;
-      case 'documentos_enviados':
-        newSteps.slice(0, 2).forEach(step => step.completed = true);
-        break;
-      case 'pago':
-        newSteps.slice(0, 1).forEach(step => step.completed = true);
-        break;
-      case 'pendente':
-        newSteps.slice(0, 0).forEach(step => step.completed = true);
-        break;
-    }
-    
-    setProcessSteps(newSteps);
-  };
 
   const handleNameChange = (newName: string) => {
     console.log("Nome do responsável alterado para:", newName);
@@ -146,6 +120,40 @@ export function ClienteDashboard({ clientId }: ClienteDashboardProps = {}) {
   };
 
 
+  const handleDeleteApplicant = async (applicantId: string) => {
+    if (!confirm("Tem certeza que deseja deletar este aplicante?")) return;
+    
+    try {
+      const success = await deleteApplicantAPI(applicantId);
+      if (success) {
+        setApplicants(prev => prev.filter(applicant => applicant.id !== applicantId));
+      }
+    } catch (error) {
+      console.error("Erro ao deletar applicant:", error);
+    }
+  };
+
+  const handleUpdateFormStatus = async (applicantId: string, formStatus: string) => {
+    try {
+      const success = await updateApplicantFormStatusAPI(applicantId, formStatus);
+      if (success) {
+        setApplicants(prev => 
+          prev.map(applicant => 
+            applicant.id === applicantId 
+              ? { ...applicant, form_status: formStatus }
+              : applicant
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Erro ao atualizar form_status:", error);
+    }
+  };
+
+  // Verificar se o usuário é funcionário ou admin
+  const isStaff = userRole === "Funcionario" || userRole === "Admin";
+
+
 
   if (authLoading || isLoading) {
     return (
@@ -157,6 +165,8 @@ export function ClienteDashboard({ clientId }: ClienteDashboardProps = {}) {
       </div>
     );
   }
+
+  const applicantResponsavel = applicants.find(applicant => applicant.is_responsible);
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-6">
@@ -173,14 +183,20 @@ export function ClienteDashboard({ clientId }: ClienteDashboardProps = {}) {
         responsibleName={responsibleData?.name || "Carregando..."}
         responsibleEmail={responsibleData?.email || "carregando@email.com"}
         processSteps={processSteps}
+        statusProcesso={applicantResponsavel?.status || "pendente"}
+        userIdResponsavel={applicantResponsavel?.responsible_user_id || ""}
         onNameChange={handleNameChange}
       />
 
       {/* Minhas Aplicações de Visto */}
       <VisaApplications
-        applicants={applicants}
+        applicantsProps={applicants}
+        userIdResponsavel={applicantResponsavel?.responsible_user_id || ""}
         onEditName={handleEditPersonName}
         editingNames={editingNames}
+        isStaff={isStaff}
+        onDeleteApplicant={handleDeleteApplicant}
+        onUpdateFormStatus={handleUpdateFormStatus}
       />
     </div>
   );

@@ -15,7 +15,7 @@ import {
 import { User, Mail, FileText, Loader2 } from "lucide-react";
 import { ProcessStep, getCurrentStep, getStepDescription } from "@/types/process";
 import { updateProcessStatusAPI } from "@/lib/api/responsible-api";
-import { updateProcessSteps } from "./updateProcessSteps";
+import { updateProcessSteps } from "../utils/updateProcessSteps";
 import { useAuth } from "@/lib/hooks/useAuth";
 
 interface ProcessInfoProps {

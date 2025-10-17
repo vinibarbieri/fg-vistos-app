@@ -196,7 +196,7 @@ export function FuncionarioManager() {
               </Button>
             </div>
 
-            <CardContent>
+            {/* <CardContent>
               <div className="flex gap-2">
                 <select
                   className="flex-1 p-2 border rounded-md bg-white"
@@ -209,7 +209,7 @@ export function FuncionarioManager() {
                   <option value="Admin">Administrador</option>
                 </select>
               </div>
-            </CardContent>
+            </CardContent> */}
           </Card>
         ))}
       </div>

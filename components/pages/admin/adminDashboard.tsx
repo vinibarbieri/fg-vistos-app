@@ -39,7 +39,7 @@ export function AdminDashboard() {
           onClick={() => setActiveTab('usuarios')}
           className="flex-1"
         >
-          Gerenciar Usuários
+          Gerenciar Acessos
         </Button>
       </div>
 

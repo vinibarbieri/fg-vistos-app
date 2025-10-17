@@ -71,6 +71,36 @@ export interface FormResponse {
   submitted_at: string;
 }
 
+export interface FormQuestionsResponse {
+  formQuestionsId: string;
+  country: string;
+  visas: string;
+  visasId: string;
+  planId: string;
+  orderId: string;
+  applicantId: string;
+  questions: Record<string, unknown>;
+}
+
+export interface FormAnswersResponse {
+  applicantId: string;
+  formStatus: string;
+  answers: Record<string, unknown>;
+  lastSaved: string;
+  hasAnswers: boolean;
+  progress: unknown;
+}
+
+export interface SaveFormAnswersResponse {
+  success: boolean;
+  applicantId: string;
+  formStatus: string;
+  savedAt: string;
+  isComplete: boolean;
+  progress: unknown;
+  message: string;
+}
+
 export interface VisaType {
   id: string;
   name: string;
@@ -655,7 +685,7 @@ class ApiService {
   }
 
   // Método para buscar form_questions por applicant
-  async getFormQuestionsByApplicant(applicantId: string): Promise<ApiResponse<unknown>> {
+  async getFormQuestionsByApplicant(applicantId: string): Promise<ApiResponse<FormQuestionsResponse>> {
     try {
       const response = await fetch(`/api/applicants/${applicantId}/form-questions`, {
         method: 'GET',
@@ -677,7 +707,7 @@ class ApiService {
   }
 
   // Método para salvar respostas do formulário
-  async saveFormAnswers(applicantId: string, answers: unknown, isComplete: boolean = false): Promise<ApiResponse<unknown>> {
+  async saveFormAnswers(applicantId: string, answers: unknown, isComplete: boolean = false): Promise<ApiResponse<SaveFormAnswersResponse>> {
     try {
       const response = await fetch(`/api/applicants/${applicantId}/form-answer`, {
         method: 'PUT',
@@ -700,7 +730,7 @@ class ApiService {
   }
 
   // Método para carregar respostas salvas do formulário
-  async getFormAnswers(applicantId: string): Promise<ApiResponse<unknown>> {
+  async getFormAnswers(applicantId: string): Promise<ApiResponse<FormAnswersResponse>> {
     try {
       const response = await fetch(`/api/applicants/${applicantId}/form-answer`, {
         method: 'GET',

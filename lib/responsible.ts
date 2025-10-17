@@ -100,7 +100,7 @@ export async function addApplicant(responsibleId: string, orderId: string): Prom
         name: defaultName,
         status: 'pending',
         form_status: 'not_started',
-        from_answer: '',
+        form_answer: '',
         attachment_id: null
       })
       .select()

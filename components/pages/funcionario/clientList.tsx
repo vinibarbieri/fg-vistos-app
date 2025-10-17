@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { ProfilesT } from "@/types/ProfilesT";
+import { Loader2 } from "lucide-react";
 
 // Tipo estendido para incluir dados relacionados
 type ClientDetails = ProfilesT & {
@@ -144,7 +145,8 @@ export function ClientList() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="flex flex-col items-center justify-center h-64 space-y-4">
+        <Loader2 className="w-8 h-8 animate-spin" />
         <div className="text-lg">Carregando clientes...</div>
       </div>
     );

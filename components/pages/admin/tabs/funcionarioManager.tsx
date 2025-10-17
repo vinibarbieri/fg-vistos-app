@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { apiService } from "@/lib/api-service";
 import { ProfilesT } from "@/types/ProfilesT";
+import { Loader2 } from "lucide-react";
 
 export function FuncionarioManager() {
   const [funcionarios, setFuncionarios] = useState<ProfilesT[]>([]);
@@ -158,7 +159,8 @@ export function FuncionarioManager() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="flex flex-col items-center justify-center h-64 space-y-4">
+        <Loader2 className="w-8 h-8 animate-spin" />
         <div className="text-lg">Carregando funcionários...</div>
       </div>
     );
@@ -224,7 +226,7 @@ export function FuncionarioManager() {
             </div>
 
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-col gap-2">
                 <div>
                   <Label htmlFor="firstName">Nome</Label>
                   <Input

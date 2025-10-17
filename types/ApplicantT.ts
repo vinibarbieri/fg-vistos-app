@@ -4,13 +4,13 @@ import { ProfilesT } from "./ProfilesT";
 
 export type ApplicantT = {
     id: string;
-    resposible_user_id: ProfilesT["id"];
+    responsible_user_id: ProfilesT["id"];
     order_id: OrderT["id"];
     is_responsible: boolean;
     name: string;
     created_at: string;
     updated_at: string;
-    from_answer: string;
+    form_answer: string;
     attachment_id: AttachmentsT["id"];
     status: string;
     form_status: string;

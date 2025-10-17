@@ -12,13 +12,18 @@ import {
   StepperTitle,
   StepperTrigger,
 } from "@/components/ui/stepper";
-import { User, Mail, FileText } from "lucide-react";
+import { User, Mail, FileText, Loader2 } from "lucide-react";
 import { ProcessStep, getCurrentStep, getStepDescription } from "@/types/process";
+import { updateProcessStatusAPI } from "@/lib/api/responsible-api";
+import { updateProcessSteps } from "./updateProcessSteps";
+import { useAuth } from "@/lib/hooks/useAuth";
 
 interface ProcessInfoProps {
   responsibleName: string;
   responsibleEmail: string;
   processSteps: ProcessStep[];
+  statusProcesso: string;
+  userIdResponsavel: string;
   onNameChange?: (name: string) => void;
 }
 
@@ -26,18 +31,46 @@ export function ProcessInfo({
   responsibleName,
   responsibleEmail,
   processSteps,
+  statusProcesso,
+  userIdResponsavel,
   onNameChange
 }: ProcessInfoProps) {
   const [name, setName] = useState(responsibleName);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [etapasProcesso, setEtapasProcesso] = useState<ProcessStep[]>(processSteps);
+  const [statusDoProcesso, setStatusDoProcesso] = useState(statusProcesso);
+  const { userRole } = useAuth();
+
+  console.log("userIdResponsavel:", userIdResponsavel);
   
   // Encontrar o passo atual usando a função utilitária
-  const activeStep = getCurrentStep(processSteps);
+  const activeStep = getCurrentStep(etapasProcesso);
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newName = e.target.value;
     setName(newName);
     onNameChange?.(newName);
   };
+
+    // Funções para funcionários/admins
+    const handleUpdateProcessStatus = async (newStatus: string, userIdResponsavel: string) => {
+      if (!userIdResponsavel) return;
+      
+      setIsUpdatingStatus(true);
+      try {
+        const success = await updateProcessStatusAPI(userIdResponsavel, newStatus);
+        if (success) {
+          setEtapasProcesso(updateProcessSteps(newStatus));
+          setStatusDoProcesso(newStatus);
+        }
+      } catch (error) {
+        console.error("Erro ao atualizar status do processo:", error);
+      } finally {
+        setIsUpdatingStatus(false);
+      }
+    };
+
+    const isStaff = userRole === "Funcionario" || userRole === "Admin";
 
   return (
     <Card>
@@ -80,12 +113,35 @@ export function ProcessInfo({
         {/* Status do Processo */}
         <div className="space-y-4">
           <div>
-            <h3 className="text-lg font-semibold mb-4">Status do Processo</h3>
+            <div className="flex flex-row items-center gap-4 mb-4">
+              <h3 className="text-lg font-semibold">Status do Processo</h3>
+              {isStaff && (
+                <div className="flex flex-row items-center gap-4 ">
+                <select
+                  id="processStatus"
+                  className="p-2 border rounded-md bg-white"
+                  value={statusDoProcesso}
+                  onChange={(e) => handleUpdateProcessStatus(e.target.value, userIdResponsavel)}
+                  disabled={isUpdatingStatus}
+                >
+                  <option value="pendente">Pendente</option>
+                  <option value="pago">Pago</option>
+                  <option value="documentos_enviados">Documentos Enviados</option>
+                  <option value="documentos_em_analise">Documentos em Análise</option>
+                  <option value="entrevista">Entrevista</option>
+                  <option value="aprovado">Aprovado</option>
+                  <option value="rejeitado">Rejeitado</option>
+                </select>
+                {isUpdatingStatus && <Loader2 className="w-4 h-4 animate-spin" />}
+              </div>
+              )}
+
+            </div>
             
             {/* Layout Desktop - Stepper horizontal */}
             <div className="hidden md:block">
               <Stepper value={activeStep} className="w-full">
-                {processSteps.map((step, index) => {
+                {etapasProcesso.map((step, index) => {
                   const dynamicDescription = getStepDescription(step, activeStep, index);
                   return (
                     <StepperItem

@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server"; // Verifique se o caminho está correto
+import { createClient } from "@/lib/supabase/server";
 
 export async function GET(
   request: Request,
-  { params }: { params: { orderId: string } }
+  { params }: { params: Promise<{ orderId: string }> }
 ) {
   try {
-    const { orderId } = params;
+    const { orderId } = await params;
 
     if (!orderId) {
       return NextResponse.json(
@@ -16,6 +16,10 @@ export async function GET(
     }
 
     const supabase = await createClient();
+    
+    // Buscar a order com verificação de tempo (últimas 10 minutos)
+    const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
+    
     const { data, error } = await supabase
       .from("orders")
       .select(
@@ -31,12 +35,13 @@ export async function GET(
       `
       )
       .eq("id", orderId)
+      .gte("created_at", tenMinutesAgo) // Só orders criadas nas últimas 10 minutos
       .single();
 
     if (error) {
       if (error.code === "PGRST116") {
         return NextResponse.json(
-          { success: false, error: "Order não encontrada" },
+          { success: false, error: "Order não encontrada ou expirada. Faça login para acessar." },
           { status: 404 }
         );
       }
@@ -45,7 +50,7 @@ export async function GET(
 
     return NextResponse.json({ success: true, data });
   } catch (error) {
-    console.error("Erro ao buscar dados da order:", error);
+    console.error("Erro ao buscar dados da order pública:", error);
     return NextResponse.json(
       { success: false, error: "Erro interno do servidor" },
       { status: 500 }

@@ -3,10 +3,10 @@ import { createClient } from "@/lib/supabase/server";
 
 export async function PUT(
   request: Request,
-  { params }: { params: { orderId: string } }
+  { params }: { params: Promise<{ orderId: string }> }
 ) {
   try {
-    const { orderId } = params;
+    const { orderId } = await params;
     const { payment_status, payment_details } = await request.json();
 
     if (!payment_status) {

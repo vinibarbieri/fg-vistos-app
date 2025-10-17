@@ -37,12 +37,12 @@ class InfinitePayService {
   constructor() {
     this.config = {
       apiUrl:
-        process.env.INFINITEPAY_API_URL || "https://api.infinitepay.com.br",
-      handle: process.env.INFINITEPAY_HANDLE || "",
+        process.env.INFINITEPAY_API_URL || "https://api.infinitepay.io",
+      handle: process.env.INFINITEPAY_HANDLE_SECURE || "fgvistos",
     };
 
-    if (!this.config.handle) {
-      console.warn("⚠️ INFINITEPAY_HANDLE não configurado");
+    if (!this.config.handle || this.config.handle === "fgvistos") {
+      console.warn("⚠️ INFINITEPAY_HANDLE_SECURE não configurado - usando fallback");
     }
   }
 

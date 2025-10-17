@@ -1,9 +1,15 @@
+/**
+ * API para verificação de status de pagamento InfinitePay
+ * 
+ * IMPORTANTE: O handle é fixo e não pode ser alterado pelo usuário por questões de segurança.
+ * Permitir que o usuário altere o handle poderia comprometer a verificação de pagamentos.
+ */
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { validateHandleSecurity, getSecureHandle } from "@/lib/security/infinitepay-security";
 
 // Schema de validação
 const checkPaymentSchema = z.object({
-  handle: z.string().min(1, "Handle é obrigatório"),
   transaction_nsu: z.string().min(1, "NSU da transação é obrigatório"),
   slug: z.string().min(1, "Slug é obrigatório"),
 });
@@ -11,11 +17,28 @@ const checkPaymentSchema = z.object({
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+    
+    // Verificação crítica de segurança do handle
+    if (!validateHandleSecurity(body, request)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Requisição inválida",
+        },
+        { status: 400 }
+      );
+    }
+    
     const validatedData = checkPaymentSchema.parse(body);
 
-    console.log("Verificando pagamento:", {
-      handle: validatedData.handle,
+    // Handle fixo para segurança - SEMPRE fgvistos
+    const handle = getSecureHandle();
+
+    // Log de auditoria para monitoramento
+    console.log("🔒 Verificando pagamento:", {
+      handle: handle.substring(0, 3) + "***", // Mascarar para logs
       transaction_nsu: validatedData.transaction_nsu,
+      timestamp: new Date().toISOString(),
     });
 
     const response = await fetch(
@@ -26,7 +49,10 @@ export async function POST(request: Request) {
           "Content-Type": "application/json",
           Accept: "application/json",
         },
-        body: JSON.stringify(validatedData),
+        body: JSON.stringify({
+          ...validatedData,
+          handle: handle,
+        }),
       }
     );
 

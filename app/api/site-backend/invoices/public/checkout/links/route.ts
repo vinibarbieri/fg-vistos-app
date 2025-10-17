@@ -1,9 +1,15 @@
+/**
+ * API para criação de checkout InfinitePay
+ * 
+ * IMPORTANTE: O handle é fixo e não pode ser alterado pelo usuário por questões de segurança.
+ * Permitir que o usuário altere o handle poderia redirecionar pagamentos para contas incorretas.
+ */
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { validateHandleSecurity, validateRequestOrigin, getSecureHandle } from "@/lib/security/infinitepay-security";
 
 // Schema de validação
 const createCheckoutSchema = z.object({
-  handle: z.string().min(1, "Handle é obrigatório"),
   redirect_url: z.string().url("URL de redirecionamento inválida"),
   order_nsu: z.string().min(1, "ID do pedido é obrigatório"),
   items: z
@@ -27,13 +33,41 @@ const createCheckoutSchema = z.object({
 
 export async function POST(request: Request) {
   try {
+    // Validação de origem da requisição
+    if (!validateRequestOrigin(request)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Acesso não autorizado",
+        },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
+    
+    // Verificação crítica de segurança do handle
+    if (!validateHandleSecurity(body, request)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Requisição inválida",
+        },
+        { status: 400 }
+      );
+    }
+    
     const validatedData = createCheckoutSchema.parse(body);
 
-    console.log("Criando checkout InfinitePay:", {
-      handle: validatedData.handle,
+    // Handle fixo para segurança - SEMPRE fgvistos
+    const handle = getSecureHandle();
+
+    // Log de auditoria para monitoramento
+    console.log("🔒 Criando checkout InfinitePay:", {
+      handle: handle.substring(0, 3) + "***", // Mascarar para logs
       order_nsu: validatedData.order_nsu,
       items_count: validatedData.items.length,
+      timestamp: new Date().toISOString(),
     });
 
     const response = await fetch(
@@ -45,7 +79,10 @@ export async function POST(request: Request) {
           Accept: "application/json",
           "User-Agent": "FG-Vistos/1.0",
         },
-        body: JSON.stringify(validatedData),
+        body: JSON.stringify({
+          ...validatedData,
+          handle: handle,
+        }),
       }
     );
 

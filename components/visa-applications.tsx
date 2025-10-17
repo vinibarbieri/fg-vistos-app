@@ -217,7 +217,7 @@ export function VisaApplications({
       });
       
       if (result.success && result.data) {
-        setApplicants(prev => [...prev, result.data]);
+        setApplicants(prev => [...prev, ...(result.data as ApplicantT[])]);
         setNewApplicant({
           name: "",
           status: "pendente",

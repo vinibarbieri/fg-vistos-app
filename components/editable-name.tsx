@@ -24,7 +24,7 @@ export function EditableName({
   const handleSaveName = async (newName: string): Promise<boolean> => {
     try {
       // Atualizar os dados pessoais com o novo nome
-      const updatedPersonalData: PersonalData = {
+      const updatedPersonalData: Partial<PersonalData> = {
         ...currentPersonalData,
         full_name: newName
       };

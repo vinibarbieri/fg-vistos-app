@@ -4,9 +4,10 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { apiService } from "@/lib/api-service";
 import { Navbar } from "./Navbar";
+import { User } from "@supabase/supabase-js";
 
 export function GlobalNav() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const pathname = usePathname();
 
   useEffect(() => {

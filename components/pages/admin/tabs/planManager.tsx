@@ -41,7 +41,7 @@ export function PlanManager() {
       }
 
       // Buscar tipos de visto disponíveis
-      const visaTypesResponse = await apiService.getVisaTypes();
+      const visaTypesResponse = await apiService.getVisas();
       if (visaTypesResponse.data) {
         setVisaTypes(visaTypesResponse.data);
       }

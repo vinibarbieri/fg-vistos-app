@@ -135,3 +135,160 @@ export function getFormStatusInfo(formStatus: string) {
       };
   }
 }
+
+// ============================================================================
+// FUNÇÕES PARA FUNCIONÁRIOS E ADMINS
+// ============================================================================
+
+// Atualizar status do processo de todos applicants de uma vez
+export async function updateProcessStatusAPI(userId: string, newStatus: string): Promise<boolean> {
+  try {
+    // Primeiro, buscar todos os applicants do usuário
+    const applicantsResponse = await fetch(`/api/applicants?responsible_user_id=${userId}`);
+
+    if (!applicantsResponse.ok) {
+      throw new Error(`HTTP error! status: ${applicantsResponse.status}`);
+    }
+    
+    const applicants = await applicantsResponse.json();
+    console.log("applicants:", applicants);
+    
+    // Atualizar cada applicant individualmente
+    const updatePromises = applicants.map((applicant: any) => 
+      fetch(`/api/applicants/${applicant.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          status: newStatus,
+          updated_at: new Date().toISOString()
+        })
+      })
+    );
+    
+    const results = await Promise.all(updatePromises);
+    console.log("results:", results);
+    // Verificar se todas as atualizações foram bem-sucedidas
+    const allSuccessful = results.every(response => response.ok);
+    
+    if (!allSuccessful) {
+      throw new Error('Algumas atualizações falharam');
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Erro ao atualizar status do processo:', error);
+    return false;
+  }
+}
+
+// Criar novo applicant
+export async function createApplicantAPI(applicantData: {
+  responsible_user_id: string;
+  order_id: string;
+  is_responsible: boolean;
+  name: string;
+  status: string;
+  form_status: string;
+}): Promise<{ success: boolean; data?: any; error?: string }> {
+  try {
+    const response = await fetch('/api/applicants', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        ...applicantData,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        form_answer: '',
+        attachment_id: null
+      })
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    return { success: true, data };
+  } catch (error) {
+    console.error('Erro ao criar applicant:', error);
+    return { success: false, error: (error as Error).message };
+  }
+}
+
+// Deletar applicant
+export async function deleteApplicantAPI(applicantId: string): Promise<boolean> {
+  try {
+    const response = await fetch(`/api/applicants/${applicantId}`, {
+      method: 'DELETE'
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Erro ao deletar applicant:', error);
+    return false;
+  }
+}
+
+// Atualizar form_status de um applicant específico
+export async function updateApplicantFormStatusAPI(applicantId: string, formStatus: string): Promise<boolean> {
+  try {
+    const response = await fetch(`/api/applicants/${applicantId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        form_status: formStatus,
+        updated_at: new Date().toISOString()
+      })
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Erro ao atualizar form_status:', error);
+    return false;
+  }
+}
+
+// Atualizar nome do responsável via API
+export async function updateResponsibleNameAPI(userId: string, newName: string): Promise<boolean> {
+  try {
+    
+    const response = await fetch(`/api/profiles/${userId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: newName
+      })
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Erro na resposta da API:', {
+        status: response.status,
+        statusText: response.statusText,
+        errorText
+      });
+      throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+    }
+    return true;
+  } catch (error) {
+    console.error('Erro ao atualizar nome do responsável:', error);
+    return false;
+  }
+}

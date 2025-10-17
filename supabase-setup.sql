@@ -5,7 +5,7 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Criar tipos ENUM
-CREATE TYPE user_role AS ENUM ('user', 'funcionario');
+CREATE TYPE user_role AS ENUM ('Cliente', 'Funcionario', 'Admin');
 CREATE TYPE order_status AS ENUM ('pending', 'processing', 'approved', 'rejected');
 
 -- Tabela de tipos de visto
@@ -20,13 +20,12 @@ CREATE TABLE IF NOT EXISTS visa_types (
 -- Tabela de perfis de usuário
 CREATE TABLE IF NOT EXISTS profiles (
     id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
-    role user_role NOT NULL DEFAULT 'user',
+    role user_role NOT NULL DEFAULT 'Cliente',
     email TEXT,
-    first_name TEXT,
-    last_name TEXT,
-    phone TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    name TEXT,
+    address TEXT,
+    interview_city TEXT,
+    account_status BOOLEAN DEFAULT true,
 );
 
 -- Tabela de planos

@@ -4,11 +4,11 @@ import { checkUserRole } from "../../utils/role-check";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
-    const { id } = params;
+    const { id } = await params;
     
     // Verificar autenticação
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -71,11 +71,11 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
-    const { id } = params;
+    const { id } = await params;
     
     // Verificar autenticação
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -146,11 +146,11 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
-    const { id } = params;
+    const { id } = await params;
     
     // Verificar autenticação
     const { data: { user }, error: authError } = await supabase.auth.getUser();

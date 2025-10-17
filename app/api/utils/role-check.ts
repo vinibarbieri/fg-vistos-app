@@ -14,11 +14,10 @@ export interface RoleCheckResult {
 
 /**
  * Verifica se o usuário tem permissão para acessar recursos usando JWT
- * @param userId ID do usuário autenticado
  * @param requiredRole Role mínimo necessário (opcional)
  * @returns Resultado da verificação de permissão
  */
-export async function checkUserRole(userId: string, requiredRole?: UserRole): Promise<RoleCheckResult> {
+export async function checkUserRole(requiredRole?: UserRole): Promise<RoleCheckResult> {
   try {
     const supabase = await createClient();
     
@@ -82,7 +81,7 @@ export async function checkUserRole(userId: string, requiredRole?: UserRole): Pr
  * @returns true se pode acessar, false caso contrário
  */
 export async function canAccessUserData(userId: string, targetUserId: string): Promise<boolean> {
-  const roleCheck = await checkUserRole(userId);
+  const roleCheck = await checkUserRole();
   
   if (!roleCheck.hasAccess || !roleCheck.role) {
     return false;
@@ -104,7 +103,7 @@ export async function canAccessUserData(userId: string, targetUserId: string): P
  * @returns true se pode editar, false caso contrário
  */
 export async function canEditUserData(userId: string, targetUserId: string): Promise<boolean> {
-  const roleCheck = await checkUserRole(userId);
+  const roleCheck = await checkUserRole();
   
   if (!roleCheck.hasAccess || !roleCheck.role) {
     return false;

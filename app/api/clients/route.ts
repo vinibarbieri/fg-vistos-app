@@ -31,7 +31,7 @@ export async function GET(request: Request) {
     }
 
     // Verificar permissões - apenas Funcionario e Admin podem ver lista de clientes
-    const roleCheck = await checkUserRole(user.id, "Funcionario");
+    const roleCheck = await checkUserRole("funcionario");
     if (!roleCheck.hasAccess) {
       return NextResponse.json({ error: "Permissão insuficiente." }, { status: 403 });
     }

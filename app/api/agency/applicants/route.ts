@@ -12,16 +12,11 @@ export async function GET() {
   }
   console.log("Usuário autenticado:", user);
 
-  // Busca o perfil do usuário para verificar seu papel
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
+    const userRole = user.app_metadata?.user_role;
 
-  console.log("Perfil do usuário:", profile);
+  console.log("Perfil do usuário:", userRole);
   // Somente Admin ou Funcionario podem acessar esta rota
-  if (profile?.role !== "Admin" && profile?.role !== "Funcionario") {
+  if (userRole !== "admin" && userRole !== "funcionario") {
     return NextResponse.json(
       { error: "Acesso negado. Permissão insuficiente." },
       { status: 403 }

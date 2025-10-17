@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ClientList } from "../funcionario/clientList";
 import { FuncionarioManager } from "./tabs/funcionarioManager";
+import { UserManagement } from "./tabs/user-management";
 
 export function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<'clientes' | 'funcionarios'>('clientes');
+  const [activeTab, setActiveTab] = useState<'clientes' | 'funcionarios' | 'usuarios'>('clientes');
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -33,6 +34,13 @@ export function AdminDashboard() {
         >
           Funcionários
         </Button>
+        <Button
+          variant={activeTab === 'usuarios' ? 'default' : 'ghost'}
+          onClick={() => setActiveTab('usuarios')}
+          className="flex-1"
+        >
+          Gerenciar Acessos
+        </Button>
       </div>
 
       {/* Conteúdo das Tabs */}
@@ -42,6 +50,10 @@ export function AdminDashboard() {
 
       {activeTab === 'funcionarios' && (
         <FuncionarioManager />
+      )}
+
+      {activeTab === 'usuarios' && (
+        <UserManagement />
       )}
     </div>
   );

@@ -17,13 +17,8 @@ export async function GET(
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-
-  if (profile?.role !== "Admin" && profile?.role !== "Funcionario") {
+  const userRole = user.app_metadata?.user_role;
+  if (userRole !== "admin" && userRole !== "funcionario") {
     return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
   }
 

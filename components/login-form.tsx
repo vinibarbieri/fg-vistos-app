@@ -15,8 +15,7 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { apiService } from "@/lib/api-service";
-import { getRedirectUrlByRoleString } from "@/lib/auth-redirect";
+import { getRedirectUrlByRole} from "@/lib/auth-redirect";
 
 export function LoginForm({
   className,
@@ -44,16 +43,16 @@ export function LoginForm({
       
       // Buscar o perfil do usuário para determinar o role
       if (data.user) {
-        const profileResponse = await apiService.getProfile(data.user.id);
+        const userRole = data.user.app_metadata?.user_role;
         
-        if (profileResponse.error || !profileResponse.data) {
-          console.error("Erro ao buscar perfil:", profileResponse.error);
+        if (!userRole) {
+          console.error("Erro ao buscar perfil:", userRole);
           setError("Erro ao carregar perfil do usuário");
           return;
         }
         
         // Redirecionar baseado no role do usuário
-        const redirectUrl = getRedirectUrlByRoleString(profileResponse.data.role);
+        const redirectUrl = getRedirectUrlByRole(userRole);
         router.push(redirectUrl);
       } else {
         router.push("/auth/login");

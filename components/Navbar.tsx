@@ -27,7 +27,7 @@ export function Navbar({ userRole, userName, userEmail }: NavbarProps) {
   // Determinar o link do dashboard baseado no role
   const getDashboardLink = () => {
     switch (userRole) {
-      case "Cliente":
+      case "cliente":
         return "/protected/user";
       default:
         return "/dashboard";
@@ -60,7 +60,7 @@ export function Navbar({ userRole, userName, userEmail }: NavbarProps) {
 
           <div className="flex items-center space-x-4">
             <Badge variant="secondary">
-              {userRole === "Admin" ? "Administrador" : userRole === "Funcionario" ? "Funcionário" : "Cliente"}
+              {userRole === "admin" ? "Administrador" : userRole === "funcionario" ? "Funcionário" : "Cliente"}
             </Badge>
 
             <DropdownMenu>

@@ -50,16 +50,12 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/auth/login", request.url));
     }
 
-    // Exemplo de verificação de permissão (role) para o dashboard.
+    // Verificação de permissão (role) para o dashboard usando JWT.
     if (pathname.startsWith("/dashboard")) {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", user.id)
-        .single();
-
-      // Se o usuário não tiver a permissão necessária, redireciona para a página inicial.
-      if (!profile || profile.role === "Cliente") {
+      const userRole = user.app_metadata?.user_role;
+      
+      // Se o usuário não tiver a permissão necessária (cliente), redireciona para a página inicial.
+      if (!userRole || userRole === "cliente") {
         return NextResponse.redirect(new URL("/", request.url));
       }
     }

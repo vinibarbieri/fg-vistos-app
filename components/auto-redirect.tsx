@@ -25,17 +25,16 @@ export function AutoRedirect() {
         return;
       }
 
-      // Usuário autenticado, buscar perfil para determinar redirecionamento
-      const profileResponse = await apiService.getProfile(currentUser.id);
-
-      if (profileResponse.error || !profileResponse.data) {
+      // Usuário autenticado, buscar user_role para determinar redirecionamento
+      const userRole = currentUser.app_metadata?.user_role;
+      if (!userRole) {
         // Perfil não encontrado, redirecionar para sign-up
         router.push("/auth/sign-up");
         return;
       }
 
       // Redirecionar baseado no role
-      const redirectUrl = getRedirectUrlByRole(profileResponse.data);
+      const redirectUrl = getRedirectUrlByRole(userRole);
       router.push(redirectUrl);
 
     } catch (error) {

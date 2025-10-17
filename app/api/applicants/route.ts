@@ -14,7 +14,7 @@ export async function GET(request: Request) {
     }
     
     // Verificar role do usuário
-    const roleCheck = await checkUserRole(user.id);
+    const roleCheck = await checkUserRole();
     
     if (!roleCheck.hasAccess || !roleCheck.role) {
       return NextResponse.json({ 
@@ -29,7 +29,7 @@ export async function GET(request: Request) {
     let query = supabase.from("applicants").select("*");
     
     // CONTROLE DE ACESSO BASEADO NO ROLE
-    if (roleCheck.role === "Cliente") {
+    if (roleCheck.role === "cliente") {
       // Cliente: só pode ver seus próprios applicants
       if (!responsibleUserId || responsibleUserId !== user.id) {
         return NextResponse.json({ 
@@ -38,7 +38,7 @@ export async function GET(request: Request) {
       }
       query = query.eq('responsible_user_id', user.id);
       
-    } else if (roleCheck.role === "Admin" || roleCheck.role === "Funcionario") {
+    } else if (roleCheck.role === "admin" || roleCheck.role === "funcionario") {
       // Admin/Funcionario: pode ver todos ou filtrar por usuário específico
       if (responsibleUserId) {
         query = query.eq('responsible_user_id', responsibleUserId);

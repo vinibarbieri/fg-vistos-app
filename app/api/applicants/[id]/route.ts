@@ -17,7 +17,7 @@ export async function GET(
       return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
     }
     
-    const roleCheck = await checkUserRole(user.id);
+    const roleCheck = await checkUserRole();
     
     if (!roleCheck.hasAccess || !roleCheck.role) {
       return NextResponse.json({ 
@@ -43,14 +43,14 @@ export async function GET(
     }
     
     // CONTROLE DE ACESSO BASEADO NO ROLE
-    if (roleCheck.role === "Cliente") {
+    if (roleCheck.role === "cliente") {
       // Cliente: só pode ver seus próprios applicants
       if (applicant.responsible_user_id !== user.id) {
         return NextResponse.json({ 
           error: "Acesso negado. Clientes só podem ver seus próprios applicants." 
         }, { status: 403 });
       }
-    } else if (roleCheck.role === "Admin" || roleCheck.role === "Funcionario") {
+    } else if (roleCheck.role === "admin" || roleCheck.role === "funcionario") {
       // Admin/Funcionario: pode ver qualquer applicant
       // Não precisa de verificação adicional
     } else {
@@ -85,7 +85,7 @@ export async function PUT(
     }
     
     // Verificar role do usuário
-    const roleCheck = await checkUserRole(user.id);
+    const roleCheck = await checkUserRole();
     
     if (!roleCheck.hasAccess || !roleCheck.role) {
       return NextResponse.json({ 
@@ -105,14 +105,14 @@ export async function PUT(
     }
     
     // CONTROLE DE ACESSO BASEADO NO ROLE
-    if (roleCheck.role === "Cliente") {
+    if (roleCheck.role === "cliente") {
       // Cliente: só pode editar seus próprios applicants
       if (applicant.responsible_user_id !== user.id) {
         return NextResponse.json({ 
           error: "Acesso negado. Clientes só podem editar seus próprios applicants." 
         }, { status: 403 });
       }
-    } else if (roleCheck.role === "Admin" || roleCheck.role === "Funcionario") {
+    } else if (roleCheck.role === "admin" || roleCheck.role === "funcionario") {
       // Admin/Funcionario: pode editar qualquer applicant
       // Não precisa de verificação adicional
     } else {
@@ -160,7 +160,7 @@ export async function DELETE(
     }
     
     // Verificar role do usuário
-    const roleCheck = await checkUserRole(user.id);
+    const roleCheck = await checkUserRole();
     
     if (!roleCheck.hasAccess || !roleCheck.role) {
       return NextResponse.json({ 
@@ -180,14 +180,14 @@ export async function DELETE(
     }
     
     // CONTROLE DE ACESSO BASEADO NO ROLE
-    if (roleCheck.role === "Cliente") {
+    if (roleCheck.role === "cliente") {
       // Cliente: só pode deletar seus próprios applicants
       if (applicant.responsible_user_id !== user.id) {
         return NextResponse.json({ 
           error: "Acesso negado. Clientes só podem deletar seus próprios applicants." 
         }, { status: 403 });
       }
-    } else if (roleCheck.role === "Admin" || roleCheck.role === "Funcionario") {
+    } else if (roleCheck.role === "admin" || roleCheck.role === "funcionario") {
       // Admin/Funcionario: pode deletar qualquer applicant
       // Não precisa de verificação adicional
     } else {

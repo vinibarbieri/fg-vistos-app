@@ -45,6 +45,22 @@ export async function PUT(
     const { id } = await params;
     const updateData = await request.json();
 
+    console.log("PUT /api/profiles/[id] - ID:", id);
+    console.log("PUT /api/profiles/[id] - Update data:", updateData);
+
+    // Verificar se o usuário está autenticado
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      console.error("Erro de autenticação:", authError);
+      return NextResponse.json({ error: "Usuário não autenticado" }, { status: 401 });
+    }
+
+    // Verificar se o usuário está tentando atualizar seu próprio perfil
+    if (user.id !== id) {
+      console.error("Usuário tentando atualizar perfil de outro usuário");
+      return NextResponse.json({ error: "Não autorizado a atualizar este perfil" }, { status: 403 });
+    }
+
     const { data, error } = await supabase
       .from("profiles")
       .update(updateData)
@@ -53,6 +69,7 @@ export async function PUT(
       .single();
 
     if (error) {
+      console.error("Erro do Supabase:", error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 

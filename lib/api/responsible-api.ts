@@ -262,3 +262,33 @@ export async function updateApplicantFormStatusAPI(applicantId: string, formStat
     return false;
   }
 }
+
+// Atualizar nome do responsável via API
+export async function updateResponsibleNameAPI(userId: string, newName: string): Promise<boolean> {
+  try {
+    
+    const response = await fetch(`/api/profiles/${userId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: newName
+      })
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Erro na resposta da API:', {
+        status: response.status,
+        statusText: response.statusText,
+        errorText
+      });
+      throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+    }
+    return true;
+  } catch (error) {
+    console.error('Erro ao atualizar nome do responsável:', error);
+    return false;
+  }
+}

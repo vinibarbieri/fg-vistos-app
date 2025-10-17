@@ -12,6 +12,7 @@ import {
   getFormStatusProgress,
   deleteApplicantAPI,
   updateApplicantFormStatusAPI,
+  updateResponsibleNameAPI,
 } from "@/lib/api/responsible-api";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { apiService } from "@/lib/api-service";
@@ -87,9 +88,22 @@ export function ClienteDashboard({ clientId }: ClienteDashboardProps = {}) {
   }, [targetUserId]);
 
 
-  const handleNameChange = (newName: string) => {
-    console.log("Nome do responsável alterado para:", newName);
-    // TODO: Implementar atualização no banco
+  const handleNameChange = async (newName: string) => {
+    if (!targetUserId || !newName.trim()) return;
+    
+    try {
+      const success = await updateResponsibleNameAPI(targetUserId, newName.trim());
+      if (success) {
+        // Atualizar o estado local com o novo nome
+        setResponsibleData(prev => 
+          prev ? { ...prev, name: newName.trim() } : null
+        );
+      } else {
+        console.error("Falha ao atualizar nome do responsável");
+      }
+    } catch (error) {
+      console.error("Erro ao atualizar nome do responsável:", error);
+    }
   };
 
   const handleEditPersonName = async (personId: string, newName: string) => {

@@ -275,6 +275,7 @@ export function VisaApplications({
                         onSave={(newName) => onEditName(person.id, newName)}
                         isLoading={editingNames.has(person.id)}
                       />
+                      {isStaff && (
                       <div className="ml-auto">
                         <Button 
                           variant="outline" 
@@ -285,6 +286,7 @@ export function VisaApplications({
                           <Trash2 className="h-3 w-3" />
                         </Button>
                       </div>
+                      )}
                     </div>
 
                     {/* Barra de progresso */}

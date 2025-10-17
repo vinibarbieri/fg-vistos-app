@@ -7,7 +7,6 @@ import { Navbar } from "./Navbar";
 
 export function GlobalNav() {
   const [user, setUser] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -29,7 +28,7 @@ export function GlobalNav() {
       console.error("Erro ao verificar usuário:", error);
       setUser(null);
     } finally {
-      setIsLoading(false);
+      // Loading completed
     }
   };
 

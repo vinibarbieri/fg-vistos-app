@@ -1,5 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
-import { Application, ApplicationStatus, PersonalData, Documents, TravelDestination, TravelPurpose } from "@/types/application";
+import { Application, ApplicationStatus } from "@/types/application";
 
 // ============================================================================
 // FUNÇÕES DO BACKEND - DESATIVADAS POR ENQUANTO

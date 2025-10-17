@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/client";
 import { ProfilesT } from "@/types/ProfilesT";
 
 // Tipos para as respostas da API
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   data?: T;
   error?: string;
   status: number;
@@ -27,7 +27,7 @@ export interface Order {
   applicants_quantity: number;
   plan_id: string;
   status: "pending" | "processing" | "approved" | "rejected";
-  payment_details?: any;
+  payment_details?: Record<string, unknown>;
   created_at: string;
   updated_at: string;
   plan_name?: string;
@@ -41,8 +41,8 @@ export interface Applicant {
   phone?: string;
   order_id: string;
   status: "pending" | "processing" | "approved" | "rejected";
-  personal_info?: any;
-  documents?: any;
+  personal_info?: Record<string, unknown>;
+  documents?: Record<string, unknown>;
   created_at: string;
   updated_at: string;
   order_details?: {
@@ -57,7 +57,7 @@ export interface FormQuestion {
     id: string;
     name?: string;
   }
-  questions: any;
+  questions: Record<string, unknown>;
   active: boolean;
   created_at: string;
   updated_at: string;
@@ -67,7 +67,7 @@ export interface FormResponse {
   id: string;
   applicant_id: string;
   form_id: string;
-  responses: any;
+  responses: Record<string, unknown>;
   submitted_at: string;
 }
 
@@ -101,7 +101,7 @@ class ApiService {
       }
 
       return { data, status: 200 };
-    } catch (error) {
+    } catch {
       return { error: "Erro ao buscar perfis", status: 500 };
     }
   }
@@ -119,7 +119,7 @@ class ApiService {
       }
 
       return { data, status: 200 };
-    } catch (error) {
+    } catch {
       return { error: "Erro ao buscar perfil", status: 500 };
     }
   }
@@ -139,7 +139,7 @@ class ApiService {
       }
 
       return { data, status: 201 };
-    } catch (error) {
+    } catch {
       return { error: "Erro ao criar perfil", status: 500 };
     }
   }
@@ -161,7 +161,7 @@ class ApiService {
       }
 
       return { data, status: 200 };
-    } catch (error) {
+    } catch {
       return { error: "Erro ao atualizar perfil", status: 500 };
     }
   }
@@ -178,7 +178,7 @@ class ApiService {
       }
 
       return { status: 200 };
-    } catch (error) {
+    } catch {
       return { error: "Erro ao deletar perfil", status: 500 };
     }
   }
@@ -196,7 +196,7 @@ class ApiService {
       }
 
       return { data, status: 200 };
-    } catch (error) {
+    } catch {
       return { error: "Erro ao buscar planos", status: 500 };
     }
   }
@@ -214,7 +214,7 @@ class ApiService {
       }
 
       return { data, status: 200 };
-    } catch (error) {
+    } catch {
       return { error: "Erro ao buscar planos ativos", status: 500 };
     }
   }
@@ -232,7 +232,7 @@ class ApiService {
       }
 
       return { data, status: 201 };
-    } catch (error) {
+    } catch {
       return { error: "Erro ao criar plano", status: 500 };
     }
   }
@@ -254,7 +254,7 @@ class ApiService {
       }
 
       return { data, status: 200 };
-    } catch (error) {
+    } catch {
       return { error: "Erro ao atualizar plano", status: 500 };
     }
   }
@@ -271,7 +271,7 @@ class ApiService {
       }
 
       return { status: 200 };
-    } catch (error) {
+    } catch {
       return { error: "Erro ao deletar plano", status: 500 };
     }
   }
@@ -315,7 +315,7 @@ class ApiService {
       }));
 
       return { data: ordersWithDetails, status: 200 };
-    } catch (error) {
+    } catch {
       return { error: "Erro ao buscar pedidos", status: 500 };
     }
   }
@@ -343,7 +343,7 @@ class ApiService {
       }));
 
       return { data: ordersWithDetails, status: 200 };
-    } catch (error) {
+    } catch {
       return { error: "Erro ao buscar pedidos do usuário", status: 500 };
     }
   }
@@ -361,7 +361,7 @@ class ApiService {
       }
 
       return { data, status: 201 };
-    } catch (error) {
+    } catch {
       return { error: "Erro ao criar pedido", status: 500 };
     }
   }
@@ -383,7 +383,7 @@ class ApiService {
       }
 
       return { data, status: 200 };
-    } catch (error) {
+    } catch {
       return { error: "Erro ao atualizar pedido", status: 500 };
     }
   }
@@ -400,7 +400,7 @@ class ApiService {
       }
 
       return { status: 200 };
-    } catch (error) {
+    } catch {
       return { error: "Erro ao deletar pedido", status: 500 };
     }
   }
@@ -464,7 +464,7 @@ class ApiService {
       }
 
       return { data, status: 200 };
-    } catch (error) {
+    } catch {
       return { error: "Erro ao buscar candidatos", status: 500 };
     }
   }
@@ -485,7 +485,7 @@ class ApiService {
       }
 
       return { data, status: 201 };
-    } catch (error) {
+    } catch {
       return { error: "Erro ao criar candidato", status: 500 };
     }
   }
@@ -507,7 +507,7 @@ class ApiService {
       }
 
       return { data, status: 200 };
-    } catch (error) {
+    } catch {
       return { error: "Erro ao atualizar candidato", status: 500 };
     }
   }
@@ -524,7 +524,7 @@ class ApiService {
       }
 
       return { status: 200 };
-    } catch (error) {
+    } catch {
       return { error: "Erro ao deletar candidato", status: 500 };
     }
   }
@@ -552,7 +552,7 @@ class ApiService {
       }));
 
       return { data: formsWithDetails, status: 200 };
-    } catch (error) {
+    } catch {
       return { error: "Erro ao buscar formulários", status: 500 };
     }
   }
@@ -572,7 +572,7 @@ class ApiService {
       }
 
       return { data, status: 200 };
-    } catch (error) {
+    } catch {
       return { error: "Erro ao buscar formulários do plano", status: 500 };
     }
   }
@@ -592,7 +592,7 @@ class ApiService {
       }
 
       return { data, status: 201 };
-    } catch (error) {
+    } catch {
       return { error: "Erro ao criar formulário", status: 500 };
     }
   }
@@ -614,7 +614,7 @@ class ApiService {
       }
 
       return { data, status: 200 };
-    } catch (error) {
+    } catch {
       return { error: "Erro ao atualizar formulário", status: 500 };
     }
   }
@@ -631,7 +631,7 @@ class ApiService {
       }
 
       return { status: 200 };
-    } catch (error) {
+    } catch {
       return { error: "Erro ao deletar formulário", status: 500 };
     }
   }
@@ -649,13 +649,13 @@ class ApiService {
       }
 
       return { data, status: 200 };
-    } catch (error) {
+    } catch {
       return { error: "Erro ao buscar vistos", status: 500 };
     }
   }
 
   // Método para buscar form_questions por applicant
-  async getFormQuestionsByApplicant(applicantId: string): Promise<ApiResponse<any>> {
+  async getFormQuestionsByApplicant(applicantId: string): Promise<ApiResponse<unknown>> {
     try {
       const response = await fetch(`/api/applicants/${applicantId}/form-questions`, {
         method: 'GET',
@@ -671,13 +671,13 @@ class ApiService {
       }
 
       return { data, status: 200 };
-    } catch (error) {
+    } catch {
       return { error: "Erro ao buscar formulário do applicant", status: 500 };
     }
   }
 
   // Método para salvar respostas do formulário
-  async saveFormAnswers(applicantId: string, answers: any, isComplete: boolean = false): Promise<ApiResponse<any>> {
+  async saveFormAnswers(applicantId: string, answers: unknown, isComplete: boolean = false): Promise<ApiResponse<unknown>> {
     try {
       const response = await fetch(`/api/applicants/${applicantId}/form-answer`, {
         method: 'PUT',
@@ -694,13 +694,13 @@ class ApiService {
       }
 
       return { data, status: 200 };
-    } catch (error) {
+    } catch {
       return { error: "Erro ao salvar respostas do formulário", status: 500 };
     }
   }
 
   // Método para carregar respostas salvas do formulário
-  async getFormAnswers(applicantId: string): Promise<ApiResponse<any>> {
+  async getFormAnswers(applicantId: string): Promise<ApiResponse<unknown>> {
     try {
       const response = await fetch(`/api/applicants/${applicantId}/form-answer`, {
         method: 'GET',
@@ -716,7 +716,7 @@ class ApiService {
       }
 
       return { data, status: 200 };
-    } catch (error) {
+    } catch {
       return { error: "Erro ao carregar respostas do formulário", status: 500 };
     }
   }
@@ -737,7 +737,7 @@ class ApiService {
       }
 
       return { data, status: 201 };
-    } catch (error) {
+    } catch {
       return { error: "Erro ao enviar formulário", status: 500 };
     }
   }
@@ -757,7 +757,7 @@ class ApiService {
       }
 
       return { data, status: 200 };
-    } catch (error) {
+    } catch {
       return { error: "Erro ao buscar respostas do formulário", status: 500 };
     }
   }
@@ -775,7 +775,7 @@ class ApiService {
       }
 
       return user;
-    } catch (error) {
+    } catch {
       return null;
     }
   }
@@ -785,7 +785,7 @@ class ApiService {
     try {
       const { error } = await this.supabase.auth.signOut();
       return !error;
-    } catch (error) {
+    } catch {
       return false;
     }
   }

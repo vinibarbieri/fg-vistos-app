@@ -18,7 +18,7 @@ export interface UserProfile {
 
 export interface ManageRolesResponse {
   success: boolean;
-  data?: any;
+  data?: unknown;
   error?: string;
 }
 

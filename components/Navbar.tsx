@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { apiService } from "@/lib/api-service";
 import { Button } from "@/components/ui/button";
@@ -54,7 +55,7 @@ export function Navbar({ userRole, userName, userEmail }: NavbarProps) {
          <Button variant="ghost" onClick={() => router.back()}> <ArrowLeft size={16}/>Voltar</Button>
           <div className="flex items-center space-x-4">
             <Link href={getDashboardLink()} className="text-2xl font-bold flex items-center">
-              <img src="/fg-logo.svg" alt="FG Vistos" className="h-10 w-auto" />
+              <Image src="/fg-logo.svg" alt="FG Vistos" width={40} height={40} className="h-10 w-auto" />
             </Link>
           </div>
 

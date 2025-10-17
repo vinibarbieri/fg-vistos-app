@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 
 export async function POST(request: NextRequest) {
@@ -50,7 +49,7 @@ export async function POST(request: NextRequest) {
     const filePath = `documents/${applicantId}/${fileName}`;
 
     // Upload para Supabase Storage (usando Service Role que bypassa RLS)
-    const { data: uploadData, error: uploadError } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from('attachments')
       .upload(filePath, file, {
         cacheControl: '3600',

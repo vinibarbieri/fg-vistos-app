@@ -132,7 +132,7 @@ export function FormManager() {
   };
 
   const removeQuestion = (key: string) => {
-    const { [key]: removed, ...remaining } = newForm.questions as Record<string, any>;
+    const { [key]: _, ...remaining } = newForm.questions as Record<string, any>;
     setNewForm((prev) => ({
       ...prev,
       questions: remaining,

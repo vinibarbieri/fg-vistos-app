@@ -13,7 +13,7 @@ interface SetUserRoleRequest {
 
 interface SetUserRoleResponse {
   success: boolean;
-  data?: any;
+  data?: unknown;
   error?: string;
 }
 
@@ -98,7 +98,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     // 9. Atualizar o app_metadata do usuário
-    const { data, error } = await supabaseAdmin.auth.admin.updateUserById(
+    const { error } = await supabaseAdmin.auth.admin.updateUserById(
       requestData.userId,
       {
         app_metadata: {
@@ -159,7 +159,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 }
 
 // Método GET para listar usuários (opcional, para interface de admin)
-export async function GET(request: NextRequest): Promise<NextResponse> {
+export async function GET(): Promise<NextResponse> {
   try {
     
     // Verificar autenticação e permissão de Admin

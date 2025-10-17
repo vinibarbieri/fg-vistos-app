@@ -1,5 +1,4 @@
 import { createClient } from "@/lib/supabase/client";
-import { ApplicantT } from "@/types/ApplicantT";
 
 // ============================================================================
 // FUNÇÕES PARA BUSCAR DADOS DO PROCESSO

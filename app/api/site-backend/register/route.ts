@@ -66,13 +66,18 @@ export async function POST(request: Request) {
 
     console.log("Usuário autenticado criado:", user.id);
 
-    // O Supabase já cria uma entrada na tabela `profiles` via trigger.
-    // Apenas atualizamos a entrada existente com os dados adicionais.
-    // 4. Atualizar o perfil criado pelo trigger do Supabase
+    // 4. Criar o perfil do usuário na tabela profiles
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
-      .update({ name: name, account_status: "true", role: "Cliente" })
-      .eq("id", user.id)
+      .upsert([{
+        id: user.id,
+        email,
+        name,
+        account_status: 'true',
+        role: 'Cliente'
+      }], {
+        onConflict: 'id'
+      })
       .select()
       .single();
 

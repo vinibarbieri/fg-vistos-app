@@ -14,6 +14,13 @@ import { Label } from "@/components/ui/label";
 import { apiService, FormQuestion, Plan } from "@/lib/api-service";
 import { useToast } from "@/lib/toast-context";
 
+interface QuestionData {
+  label: string;
+  type: string;
+  required: boolean;
+  options?: string[];
+}
+
 export function FormManager() {
   const [forms, setForms] = useState<FormQuestion[]>([]);
   const [plans, setPlans] = useState<Plan[]>([]);
@@ -118,7 +125,7 @@ export function FormManager() {
     }));
   };
 
-  const updateQuestion = (key: string, field: string, value: any) => {
+  const updateQuestion = (key: string, field: string, value: unknown) => {
     setNewForm((prev) => ({
       ...prev,
       questions: {
@@ -132,10 +139,11 @@ export function FormManager() {
   };
 
   const removeQuestion = (key: string) => {
-    const { [key]: removed, ...remaining } = newForm.questions as Record<string, any>;
+    const questions = { ...newForm.questions };
+    delete questions[key];
     setNewForm((prev) => ({
       ...prev,
-      questions: remaining,
+      questions,
     }));
   };
 
@@ -225,13 +233,15 @@ export function FormManager() {
                 </div>
 
                 {Object.entries(newForm.questions).map(
-                  ([key, question]: [string, any]) => (
+                  ([key, question]) => {
+                    const questionData = question as QuestionData;
+                    return (
                     <div key={key} className="border rounded-lg p-4 mb-4">
                       <div className="grid grid-cols-3 gap-4 mb-2">
                         <div>
                           <Label>Rótulo</Label>
                           <Input
-                            value={question.label}
+                            value={questionData.label}
                             onChange={(e) =>
                               updateQuestion(key, "label", e.target.value)
                             }
@@ -242,7 +252,7 @@ export function FormManager() {
                           <Label>Tipo</Label>
                           <select
                             className="w-full p-2 border rounded-md"
-                            value={question.type}
+                            value={questionData.type}
                             onChange={(e) =>
                               updateQuestion(key, "type", e.target.value)
                             }
@@ -269,7 +279,7 @@ export function FormManager() {
                         <input
                           type="checkbox"
                           id={`required_${key}`}
-                          checked={question.required}
+                          checked={questionData.required}
                           onChange={(e) =>
                             updateQuestion(key, "required", e.target.checked)
                           }
@@ -277,7 +287,8 @@ export function FormManager() {
                         <Label htmlFor={`required_${key}`}>Obrigatório</Label>
                       </div>
                     </div>
-                  )
+                    );
+                  }
                 )}
               </div>
 

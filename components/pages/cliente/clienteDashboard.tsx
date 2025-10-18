@@ -56,7 +56,7 @@ export function ClienteDashboard({ clientId }: ClienteDashboardProps = {}) {
           let progressValue: number;
           try {
             const progressResponse = await apiService.getFormAnswers(applicant.id);
-            progressValue = progressResponse.data?.progress?.progressPercentage || getFormStatusProgress(applicant.form_status)
+            progressValue = (progressResponse.data?.progress as { progressPercentage?: number })?.progressPercentage ?? getFormStatusProgress(applicant.form_status)
           } catch (error) {
             console.error(`Erro ao buscar progresso do applicant ${applicant.id}:`, error);
             progressValue = getFormStatusProgress(applicant.form_status)

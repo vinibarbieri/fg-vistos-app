@@ -63,6 +63,7 @@ export function DocumentUploadModal({
 
   const getFileIcon = (fileType: string) => {
     if (fileType === 'application/pdf') return <FileText className="h-6 w-6 text-red-500 flex-shrink-0" />;
+    // eslint-disable-next-line jsx-a11y/alt-text
     if (fileType.includes('image/')) return <Image className="h-6 w-6 text-blue-500 flex-shrink-0" />;
     return <FileImage className="h-6 w-6 text-gray-500 flex-shrink-0" />;
   };

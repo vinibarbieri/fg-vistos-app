@@ -1,7 +1,6 @@
 "use client";
 
 import React, { createContext, useContext, useReducer, ReactNode } from "react";
-import { Toast } from "@/components/ui/toast";
 
 interface ToastState {
   toasts: Array<{

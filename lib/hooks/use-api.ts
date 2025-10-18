@@ -8,13 +8,13 @@ interface UseApiState<T> {
 }
 
 interface UseApiReturn<T> extends UseApiState<T> {
-  execute: (...args: any[]) => Promise<void>;
+  execute: (...args: unknown[]) => Promise<void>;
   reset: () => void;
   setData: (data: T | null) => void;
 }
 
-export function useApi<T = any>(
-  apiFunction: (...args: any[]) => Promise<ApiResponse<T>>,
+export function useApi<T = unknown>(
+  apiFunction: (...args: unknown[]) => Promise<ApiResponse<T>>,
   initialData: T | null = null
 ): UseApiReturn<T> {
   const [state, setState] = useState<UseApiState<T>>({
@@ -24,7 +24,7 @@ export function useApi<T = any>(
   });
 
   const execute = useCallback(
-    async (...args: any[]) => {
+    async (...args: unknown[]) => {
       setState((prev) => ({ ...prev, loading: true, error: null }));
 
       try {
@@ -34,7 +34,7 @@ export function useApi<T = any>(
           setState((prev) => ({
             ...prev,
             loading: false,
-            error: response.error,
+            error: response.error || null,
           }));
         } else {
           setState((prev) => ({
@@ -75,8 +75,8 @@ export function useApi<T = any>(
 }
 
 // Hook específico para operações CRUD
-export function useCrudApi<T = any>(apiService: {
-  get: (...args: any[]) => Promise<ApiResponse<T[]>>;
+export function useCrudApi<T = unknown>(apiService: {
+  get: (...args: unknown[]) => Promise<ApiResponse<T[]>>;
   create: (data: Partial<T>) => Promise<ApiResponse<T>>;
   update: (id: string, data: Partial<T>) => Promise<ApiResponse<T>>;
   delete: (id: string) => Promise<ApiResponse<void>>;
@@ -86,7 +86,7 @@ export function useCrudApi<T = any>(apiService: {
   const [error, setError] = useState<string | null>(null);
 
   const fetchData = useCallback(
-    async (...args: any[]) => {
+    async (...args: unknown[]) => {
       setLoading(true);
       setError(null);
 
@@ -146,7 +146,9 @@ export function useCrudApi<T = any>(apiService: {
         } else {
           setData((prev) =>
             prev.map((item) =>
-              (item as any).id === id ? { ...item, ...updates } : item
+              (item as { id: string }).id === id
+                ? { ...item, ...updates }
+                : item
             )
           );
           return response.data;
@@ -173,7 +175,9 @@ export function useCrudApi<T = any>(apiService: {
           setError(response.error);
           return false;
         } else {
-          setData((prev) => prev.filter((item) => (item as any).id !== id));
+          setData((prev) =>
+            prev.filter((item) => (item as { id: string }).id !== id)
+          );
           return true;
         }
       } catch (error) {
@@ -204,4 +208,3 @@ export function useCrudApi<T = any>(apiService: {
     setData,
   };
 }
-

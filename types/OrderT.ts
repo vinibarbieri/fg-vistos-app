@@ -15,5 +15,5 @@ export type OrderT = {
 
   payment_status: string;
 
-  payment_details: any;
+  payment_details: Record<string, unknown>;
 };

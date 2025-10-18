@@ -5,7 +5,7 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { roleManager, UserProfile, UserRole } from '@/lib/services/role-manager';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -23,11 +23,25 @@ export function UserManagement({ className }: UserManagementProps) {
   const [updatingUsers, setUpdatingUsers] = useState<Set<string>>(new Set());
   const { success, error } = useToast();
 
-  useEffect(() => {
-    checkPermissionsAndLoadUsers();
-  }, []);
+  const loadUsers = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await roleManager.getUsersList();
+      
+      if (response.success && response.data) {
+        setUsers(response.data);
+      } else {
+        error("Erro", response.error || "Erro ao carregar usuários.");
+      }
+    } catch (err) {
+      console.error('Erro ao carregar usuários:', err);
+      error("Erro", "Erro interno ao carregar usuários.");
+    } finally {
+      setLoading(false);
+    }
+  }, [error]);
 
-  const checkPermissionsAndLoadUsers = async () => {
+  const checkPermissionsAndLoadUsers = useCallback(async () => {
     try {
       // Verificar se o usuário atual é admin
       const adminCheck = await roleManager.isCurrentUserAdmin();
@@ -44,25 +58,11 @@ export function UserManagement({ className }: UserManagementProps) {
       console.error('Erro ao verificar permissões:', err);
       error("Erro", "Erro ao verificar permissões.");
     }
-  };
+  }, [error, loadUsers]);
 
-  const loadUsers = async () => {
-    try {
-      setLoading(true);
-      const response = await roleManager.getUsersList();
-      
-      if (response.success && response.data) {
-        setUsers(response.data);
-      } else {
-        error("Erro", response.error || "Erro ao carregar usuários.");
-      }
-    } catch (err) {
-      console.error('Erro ao carregar usuários:', err);
-      error("Erro", "Erro interno ao carregar usuários.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    checkPermissionsAndLoadUsers();
+  }, [checkPermissionsAndLoadUsers]);
 
   const handleRoleChange = async (userId: string, newRole: UserRole) => {
     try {

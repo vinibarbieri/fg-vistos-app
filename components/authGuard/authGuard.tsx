@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { AdminDashboard } from "../pages/admin/adminDashboard";
 import { apiService } from "@/lib/api-service";
@@ -8,15 +8,11 @@ import { FuncionarioDashboard } from "../pages/funcionario/funcionarioDashboard"
 import { getRedirectUrlByRole } from "@/lib/auth-redirect";
 
 export function AuthGuard() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<{ app_metadata?: { user_role?: string } } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
-  useEffect(() => {
-    checkUser();
-  }, []);
-
-  const checkUser = async () => {
+  const checkUser = useCallback(async () => {
     try {
       // Verificar se o usuário está autenticado
       const currentUser = await apiService.getCurrentUser();
@@ -26,7 +22,7 @@ export function AuthGuard() {
         return;
       }
 
-      setUser(currentUser);
+      setUser(currentUser as { app_metadata?: { user_role?: string } });
 
       // Obter o role do JWT
       const userRole = currentUser.app_metadata?.user_role;
@@ -53,7 +49,11 @@ export function AuthGuard() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [router]);
+
+  useEffect(() => {
+    checkUser();
+  }, [checkUser]);
 
   if (isLoading) {
     return (

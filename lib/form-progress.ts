@@ -104,7 +104,7 @@ function isFieldCompleted(field: FormField, answers: FormAnswer): boolean {
  * @param value - Valor atual
  * @returns true se deve mostrar campos dependentes
  */
-function shouldShowDependentFieldsForValue(field: FormField, value: any): boolean {
+function shouldShowDependentFieldsForValue(field: FormField, value: unknown): boolean {
   if (field.type === 'boolean') {
     return value === 'Sim' || value === true;
   }
@@ -118,7 +118,7 @@ function shouldShowDependentFieldsForValue(field: FormField, value: any): boolea
  * @param value - Valor a ser verificado
  * @returns true se o valor é válido
  */
-function hasValidValue(value: any): boolean {
+function hasValidValue(value: unknown): boolean {
   if (value === undefined || value === null) {
     return false;
   }

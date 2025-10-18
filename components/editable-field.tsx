@@ -16,7 +16,6 @@ interface EditableFieldProps {
 export function EditableField({ 
   value, 
   onSave, 
-  label, 
   placeholder = "Digite o valor...",
   className = ""
 }: EditableFieldProps) {

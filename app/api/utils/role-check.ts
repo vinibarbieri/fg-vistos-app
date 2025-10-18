@@ -65,7 +65,7 @@ export async function checkUserRole(requiredRole?: UserRole): Promise<RoleCheckR
       error: hasAccess ? undefined : "Permissão insuficiente"
     };
     
-  } catch (error) {
+  } catch {
     return {
       hasAccess: false,
       role: null,

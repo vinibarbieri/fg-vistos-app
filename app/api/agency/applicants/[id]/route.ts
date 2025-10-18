@@ -4,10 +4,10 @@ import { createClient } from "@/lib/supabase/server";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const supabase = await createClient();
-  const applicantId = params.id; // Aqui pegamos o ID da URL
+  const { id: applicantId } = await params;
 
   // 1. Verificação de Segurança (papel do usuário)
   const {

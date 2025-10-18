@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import {
   Card,
-  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
@@ -11,7 +10,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { apiService } from "@/lib/api-service";
 import { ProfilesT } from "@/types/ProfilesT";
 import { Loader2 } from "lucide-react";
@@ -89,26 +87,6 @@ export function FuncionarioManager() {
     }
   };
 
-  const handleUpdateFuncionario = async (funcionarioId: string, updates: Partial<ProfilesT>) => {
-    try {
-      const response = await apiService.updateProfile(funcionarioId, updates);
-      
-      if (response.error) throw new Error(response.error);
-
-      // Atualizar estado local
-      setFuncionarios(prev =>
-        prev.map(funcionario =>
-          funcionario.id === funcionarioId
-            ? { ...funcionario, ...updates }
-            : funcionario
-        )
-      );
-    } catch (error) {
-      console.error("Erro ao atualizar funcionário:", error);
-      alert("Erro ao atualizar funcionário: " + (error as Error).message);
-    }
-  };
-
   const handleDeleteFuncionario = async (funcionarioId: string) => {
     if (!confirm("Tem certeza que deseja deletar este funcionário?")) {
       return;
@@ -132,28 +110,6 @@ export function FuncionarioManager() {
     } catch (error) {
       console.error("Erro ao deletar funcionário:", error);
       alert("Erro ao deletar funcionário: " + (error as Error).message);
-    }
-  };
-
-  const getRoleColor = (role: string) => {
-    switch (role) {
-      case "admin":
-        return "bg-red-100 text-red-800";
-      case "funcionario":
-        return "bg-blue-100 text-blue-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  const getRoleText = (role: string) => {
-    switch (role) {
-      case "admin":
-        return "Administrador";
-      case "funcionario":
-        return "Funcionário";
-      default:
-        return "Desconhecido";
     }
   };
 

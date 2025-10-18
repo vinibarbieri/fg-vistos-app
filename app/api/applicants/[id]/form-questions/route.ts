@@ -102,7 +102,7 @@ export async function GET(
       parsedQuestions = typeof formQuestions.questions === 'string' 
         ? JSON.parse(formQuestions.questions) 
         : formQuestions.questions;
-    } catch (parseError) {
+    } catch {
       return NextResponse.json(
         { error: "Erro ao processar formulário. Formato inválido." },
         { status: 500 }

@@ -74,7 +74,7 @@ export async function PUT(
     }
 
     // Preparar dados para atualização
-    const updateData: any = {
+    const updateData: Record<string, string> = {
       form_answer: JSON.stringify(answers),
       updated_at: new Date().toISOString()
     };
@@ -103,7 +103,7 @@ export async function PUT(
     }
 
     // Buscar dados do formulário para calcular progresso
-    let progressData: any = null;
+    let progressData: unknown = null;
     try {
       const { data: formQuestionsData } = await supabase
         .from("applicants")
@@ -241,7 +241,7 @@ export async function GET(
     }
 
     // Buscar dados do formulário para calcular progresso
-    let progressData: any = null;
+    let progressData: unknown = null;
     try {
       const { data: formQuestionsData } = await supabase
         .from("applicants")

@@ -2,20 +2,20 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, ArrowRight, Save, CheckCircle, Circle, Loader2 } from "lucide-react";
-import { FormData, FormProgress, FormAnswer } from "@/types/FormT";
+import { FormData, FormProgress, FormAnswer, FormStep } from "@/types/FormT";
 import { FormStepComponent } from "@/components/form/FormStepComponent";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { apiService } from "@/lib/api-service";
-import { calculateFormProgress, calculateStepProgress } from "@/lib/form-progress";
+import { calculateFormProgress } from "@/lib/form-progress";
 
 export default function FormPage() {
   const params = useParams();
   const router = useRouter();
-  const { userId } = useAuth();
+  useAuth();
   const applicantId = params.id as string;
 
   const [formData, setFormData] = useState<FormData | null>(null);
@@ -24,7 +24,28 @@ export default function FormPage() {
     completedSteps: [],
     answers: {},
   });
-  const [calculatedProgress, setCalculatedProgress] = useState<any>(null);
+  const [calculatedProgress, setCalculatedProgress] = useState<{
+    totalSteps: number;
+    completedSteps: number;
+    totalFields: number;
+    completedFields: number;
+    progressPercentage: number;
+    stepProgress: Array<{
+      stepIndex: number;
+      stepId: string;
+      stepTitle: string;
+      totalFields: number;
+      completedFields: number;
+      progressPercentage: number;
+      isCompleted: boolean;
+      fields: Array<{
+        fieldId: string;
+        fieldText: string;
+        isCompleted: boolean;
+        hasValue: boolean;
+      }>;
+    }>;
+  } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -43,12 +64,13 @@ export default function FormPage() {
           return;
         }
 
-        const { questions, country, visaType } = response.data;
+        const { questions } = response.data || {};
         
         // Converter as perguntas do formato JSON para FormData
+        const steps = Array.isArray(questions) ? questions as FormStep[] : (questions?.steps as FormStep[] || []);
         const formData: FormData = {
-          steps: questions.steps || questions, // Suporta tanto formato com steps quanto array direto
-          totalSteps: questions.steps ? questions.steps.length : questions.length
+          steps,
+          totalSteps: steps.length
         };
 
         setFormData(formData);
@@ -58,12 +80,33 @@ export default function FormPage() {
         if (savedAnswersResponse.data && savedAnswersResponse.data.hasAnswers) {
           setFormProgress(prev => ({ 
             ...prev, 
-            answers: savedAnswersResponse.data.answers 
+            answers: savedAnswersResponse.data!.answers as FormAnswer
           }));
           
           // Definir progresso calculado se disponível
           if (savedAnswersResponse.data.progress) {
-            setCalculatedProgress(savedAnswersResponse.data.progress);
+            setCalculatedProgress(savedAnswersResponse.data.progress as {
+              totalSteps: number;
+              completedSteps: number;
+              totalFields: number;
+              completedFields: number;
+              progressPercentage: number;
+              stepProgress: Array<{
+                stepIndex: number;
+                stepId: string;
+                stepTitle: string;
+                totalFields: number;
+                completedFields: number;
+                progressPercentage: number;
+                isCompleted: boolean;
+                fields: Array<{
+                  fieldId: string;
+                  fieldText: string;
+                  isCompleted: boolean;
+                  hasValue: boolean;
+                }>;
+              }>;
+            });
           }
         }
 
@@ -95,7 +138,7 @@ export default function FormPage() {
       setHasUnsavedChanges(false);
       setFormProgress(prev => ({
         ...prev,
-        lastSaved: response.data.savedAt
+        lastSaved: response.data?.savedAt
       }));
       
       console.log("Progresso salvo com sucesso!");
@@ -121,7 +164,28 @@ export default function FormPage() {
     // Recalcular progresso
     if (formData) {
       const progress = calculateFormProgress(formData, newAnswers);
-      setCalculatedProgress(progress);
+      setCalculatedProgress(progress as {
+        totalSteps: number;
+        completedSteps: number;
+        totalFields: number;
+        completedFields: number;
+        progressPercentage: number;
+        stepProgress: Array<{
+          stepIndex: number;
+          stepId: string;
+          stepTitle: string;
+          totalFields: number;
+          completedFields: number;
+          progressPercentage: number;
+          isCompleted: boolean;
+          fields: Array<{
+            fieldId: string;
+            fieldText: string;
+            isCompleted: boolean;
+            hasValue: boolean;
+          }>;
+        }>;
+      });
     }
     
     setHasUnsavedChanges(true);
@@ -219,7 +283,7 @@ export default function FormPage() {
 
   const currentStep = formData.steps[formProgress.currentStep];
   const isLastStep = formProgress.currentStep >= formData.totalSteps - 1;
-  const progressPercentage = calculatedProgress?.progressPercentage || ((formProgress.currentStep + 1) / formData.totalSteps) * 100;
+  const progressPercentage = calculatedProgress?.progressPercentage ?? ((formProgress.currentStep + 1) / formData.totalSteps) * 100;
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-6">
@@ -254,8 +318,8 @@ export default function FormPage() {
             {/* Step Indicators */}
             <div className="flex justify-between">
               {formData.steps.map((step, index) => {
-                const stepProgress = calculatedProgress?.stepProgress?.[index];
-                const isPreenchido = stepProgress?.progressPercentage > 0;
+                const stepProgress = calculatedProgress?.stepProgress?.find(sp => sp.stepIndex === index);
+                const isPreenchido = (stepProgress?.progressPercentage ?? 0) > 0;
                 
                 return (
                   <button

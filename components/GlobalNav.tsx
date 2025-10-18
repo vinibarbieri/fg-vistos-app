@@ -4,10 +4,10 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { apiService } from "@/lib/api-service";
 import { Navbar } from "./Navbar";
+import { User } from "@supabase/supabase-js";
 
 export function GlobalNav() {
-  const [user, setUser] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -29,7 +29,7 @@ export function GlobalNav() {
       console.error("Erro ao verificar usuário:", error);
       setUser(null);
     } finally {
-      setIsLoading(false);
+      // Loading completed
     }
   };
 

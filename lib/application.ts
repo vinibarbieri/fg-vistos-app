@@ -1,5 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
-import { Application, ApplicationStatus, PersonalData, Documents, TravelDestination, TravelPurpose } from "@/types/application";
+import { Application, ApplicationStatus } from "@/types/application";
 
 // ============================================================================
 // FUNÇÕES DO BACKEND - DESATIVADAS POR ENQUANTO
@@ -165,7 +164,7 @@ const mockApplicationData: Application = {
 };
 
 // Funções mockadas que simulam o comportamento do backend
-export async function getUserApplication(userId: string): Promise<Application | null> {
+export async function getUserApplication(): Promise<Application | null> {
   // Simular delay de rede
   await new Promise(resolve => setTimeout(resolve, 300));
   
@@ -193,7 +192,7 @@ export async function createApplication(userId: string): Promise<Application | n
 export async function saveStepData(
   applicationId: string, 
   stepKey: string, 
-  data: any
+  data: Record<string, unknown>
 ): Promise<boolean> {
   // Simular delay de rede
   await new Promise(resolve => setTimeout(resolve, 400));
@@ -234,17 +233,17 @@ export async function updateApplicationStatus(
 // ============================================================================
 
 // Verificar se uma etapa está completa
-export function isStepCompleted(stepData: Record<string, any>, stepKey: string): boolean {
+export function isStepCompleted(stepData: Record<string, unknown>, stepKey: string): boolean {
   return stepData[stepKey] !== undefined && stepData[stepKey] !== null;
 }
 
 // Obter dados de uma etapa específica
-export function getStepData<T>(stepData: Record<string, any>, stepKey: string): T | null {
-  return stepData[stepKey] || null;
+export function getStepData<T>(stepData: Record<string, unknown>, stepKey: string): T | null {
+  return (stepData[stepKey] as T) || null;
 }
 
 // Calcular progresso baseado nas etapas completadas
-export function calculateProgressFromSteps(stepData: Record<string, any>): number {
+export function calculateProgressFromSteps(stepData: Record<string, unknown>): number {
   const totalSteps = 5;
   const completedSteps = Object.keys(stepData).filter(key => 
     stepData[key] !== undefined && stepData[key] !== null

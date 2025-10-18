@@ -154,7 +154,7 @@ export async function updateProcessStatusAPI(userId: string, newStatus: string):
     console.log("applicants:", applicants);
     
     // Atualizar cada applicant individualmente
-    const updatePromises = applicants.map((applicant: any) => 
+    const updatePromises = applicants.map((applicant: { id: string }) => 
       fetch(`/api/applicants/${applicant.id}`, {
         method: 'PUT',
         headers: {
@@ -191,7 +191,7 @@ export async function createApplicantAPI(applicantData: {
   name: string;
   status: string;
   form_status: string;
-}): Promise<{ success: boolean; data?: any; error?: string }> {
+}): Promise<{ success: boolean; data?: { id: string; name: string; status: string; form_status: string; responsible_user_id: string; order_id: string; is_responsible: boolean; created_at: string; updated_at: string; form_answer: string; attachment_id: string | null }; error?: string }> {
   try {
     const response = await fetch('/api/applicants', {
       method: 'POST',

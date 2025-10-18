@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { User, Edit2, Check, X, Loader2, Upload, Trash2, Settings, Plus } from "lucide-react";
+import { User, Edit2, Check, X, Loader2, Upload, Trash2, Plus } from "lucide-react";
 import { ApplicantT } from "@/types/ApplicantT";
 import { AttachmentsT } from "@/types/AttachmentsT";
 import { DocumentUploadModal } from "@/components/document-upload-modal";
@@ -217,7 +217,7 @@ export function VisaApplications({
       });
       
       if (result.success && result.data) {
-        setApplicants(prev => [...prev, result.data]);
+        setApplicants(prev => [...prev, result.data as ApplicantT]);
         setNewApplicant({
           name: "",
           status: "pendente",

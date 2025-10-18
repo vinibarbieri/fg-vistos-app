@@ -28,7 +28,7 @@ export function getSecureHandle(): string {
  * @param request Objeto Request para logs
  * @returns true se válido, false se bloqueado
  */
-export function validateHandleSecurity(body: any, request: Request): boolean {
+export function validateHandleSecurity(body: { handle?: string }, request: Request): boolean {
   // Se alguém tentar enviar um handle diferente, BLOQUEAR
   if (body.handle && body.handle !== "fgvistos") {
     console.error("🚨 TENTATIVA DE MANIPULAÇÃO CRÍTICA:", {

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from "axios";
 
 interface InfinitePayConfig {
@@ -36,13 +35,14 @@ class InfinitePayService {
 
   constructor() {
     this.config = {
-      apiUrl:
-        process.env.INFINITEPAY_API_URL || "https://api.infinitepay.io",
+      apiUrl: process.env.INFINITEPAY_API_URL || "https://api.infinitepay.io",
       handle: process.env.INFINITEPAY_HANDLE_SECURE || "fgvistos",
     };
 
     if (!this.config.handle || this.config.handle === "fgvistos") {
-      console.warn("⚠️ INFINITEPAY_HANDLE_SECURE não configurado - usando fallback");
+      console.warn(
+        "⚠️ INFINITEPAY_HANDLE_SECURE não configurado - usando fallback"
+      );
     }
   }
 
@@ -107,7 +107,9 @@ class InfinitePayService {
   }
 
   // Webhook para receber notificações do InfinitePay
-  async handleWebhook(payload: any): Promise<{ success: boolean }> {
+  async handleWebhook(
+    payload: Record<string, unknown>
+  ): Promise<{ success: boolean }> {
     try {
       // Aqui você pode processar o webhook
       // Por exemplo, atualizar o status do pedido no banco

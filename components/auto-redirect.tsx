@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { apiService } from "@/lib/api-service";
 import { getRedirectUrlByRole } from "@/lib/auth-redirect";
@@ -10,11 +10,7 @@ export function AutoRedirect() {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
-  useEffect(() => {
-    checkAuthAndRedirect();
-  }, []);
-
-  const checkAuthAndRedirect = async () => {
+  const checkAuthAndRedirect = useCallback(async () => {
     try {
       // Verificar se o usuário está autenticado
       const currentUser = await apiService.getCurrentUser();
@@ -44,7 +40,11 @@ export function AutoRedirect() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [router]);
+
+  useEffect(() => {
+    checkAuthAndRedirect();
+  }, [checkAuthAndRedirect]);
 
   if (isLoading) {
     return (

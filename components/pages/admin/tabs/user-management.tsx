@@ -39,7 +39,7 @@ export function UserManagement({ className }: UserManagementProps) {
     } finally {
       setLoading(false);
     }
-  }, [error]);
+  }, []);
 
   const checkPermissionsAndLoadUsers = useCallback(async () => {
     try {
@@ -58,11 +58,11 @@ export function UserManagement({ className }: UserManagementProps) {
       console.error('Erro ao verificar permissões:', err);
       error("Erro", "Erro ao verificar permissões.");
     }
-  }, [error, loadUsers]);
+  }, [loadUsers]);
 
   useEffect(() => {
     checkPermissionsAndLoadUsers();
-  }, [checkPermissionsAndLoadUsers]);
+  }, []);
 
   const handleRoleChange = async (userId: string, newRole: UserRole) => {
     try {

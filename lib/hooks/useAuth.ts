@@ -17,6 +17,7 @@ export function useAuth() {
         setUser(user);
       } catch (error) {
         console.error("Erro ao obter usuário:", error);
+        setUser(null);
       } finally {
         setLoading(false);
       }

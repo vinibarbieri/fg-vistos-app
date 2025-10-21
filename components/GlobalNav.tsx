@@ -1,44 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { apiService } from "@/lib/api-service";
 import { Navbar } from "./Navbar";
-import { User } from "@supabase/supabase-js";
+import { useAuth } from "@/lib/hooks/useAuth";
 
 export function GlobalNav() {
-  const [user, setUser] = useState<User | null>(null);
+  const { user, loading } = useAuth();
   const pathname = usePathname();
-
-  useEffect(() => {
-    checkUser();
-  }, []);
-
-  const checkUser = async () => {
-    try {
-      // Verificar se o usuário está autenticado
-      const currentUser = await apiService.getCurrentUser();
-
-      if (!currentUser) {
-        setUser(null);
-        return;
-      }
-
-      setUser(currentUser);
-    } catch (error) {
-      console.error("Erro ao verificar usuário:", error);
-      setUser(null);
-    } finally {
-      // Loading completed
-    }
-  };
 
   // Não mostrar navbar em páginas de autenticação
   const authPages = ['/auth/login', '/auth/sign-up', '/auth/forgot-password', '/auth/update-password'];
   const isAuthPage = authPages.some(page => pathname.startsWith(page));
 
-  // Não mostrar navbar se estiver carregando ou se for página de auth
-  if (isAuthPage || !user) {
+  // Não mostrar navbar se for página de auth ou se estiver carregando e não há usuário
+  if (isAuthPage || (loading && !user)) {
     return null;
   }
 

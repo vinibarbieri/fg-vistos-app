@@ -55,10 +55,8 @@ export function validateRequestOrigin(request: Request): boolean {
   const allowedOrigins = [
     'http://localhost:3000',
     'http://localhost:5173',
-    `https://fg-vistos.vercel.app/`,
-    `https://fg-vistos-app.vercel.app/`,
-    'https://fgvistos.com',
-    'https://www.fgvistos.com',
+    'https://fgvistos.com.br',
+    'https://www.fgvistos.com.br',
   ];
   
   if (origin && !allowedOrigins.includes(origin)) {

@@ -7,6 +7,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { validateHandleSecurity, validateRequestOrigin, getSecureHandle } from "@/lib/security/infinitepay-security";
+import { logger } from "@/lib/logger";
 
 // Schema de validação
 const createCheckoutSchema = z.object({
@@ -33,8 +34,18 @@ const createCheckoutSchema = z.object({
 
 export async function POST(request: Request) {
   try {
+    logger.api("Checkout endpoint chamado", {
+      url: request.url,
+      method: request.method,
+      origin: request.headers.get('origin'),
+    });
+
     // Validação de origem da requisição
     if (!validateRequestOrigin(request)) {
+      logger.security("Tentativa de acesso não autorizada", {
+        origin: request.headers.get('origin'),
+        referer: request.headers.get('referer'),
+      });
       return NextResponse.json(
         {
           success: false,
@@ -48,6 +59,10 @@ export async function POST(request: Request) {
     
     // Verificação crítica de segurança do handle
     if (!validateHandleSecurity(body, request)) {
+      logger.security("Validação de segurança do handle falhou", {
+        attemptedHandle: body.handle,
+        orderNsu: body.order_nsu,
+      });
       return NextResponse.json(
         {
           success: false,
@@ -63,11 +78,10 @@ export async function POST(request: Request) {
     const handle = getSecureHandle();
 
     // Log de auditoria para monitoramento
-    console.log("🔒 Criando checkout InfinitePay:", {
+    logger.payment("Criando checkout InfinitePay", {
       handle: handle.substring(0, 3) + "***", // Mascarar para logs
       order_nsu: validatedData.order_nsu,
       items_count: validatedData.items.length,
-      timestamp: new Date().toISOString(),
     });
 
     const response = await fetch(
@@ -105,7 +119,7 @@ export async function POST(request: Request) {
       );
     }
 
-    console.log("Checkout criado com sucesso:", {
+    logger.payment("Checkout criado com sucesso", {
       order_nsu: validatedData.order_nsu,
       checkout_id: responseData?.id || responseData?.checkout_id,
     });

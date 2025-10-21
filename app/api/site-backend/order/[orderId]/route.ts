@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createClient as createServiceClient } from "@supabase/supabase-js";
 
 export async function GET(
   request: Request,
@@ -15,10 +16,11 @@ export async function GET(
       );
     }
 
-    const supabase = await createClient();
-    
-    // Buscar a order com verificação de tempo (últimas 10 minutos)
-    const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
+    // Usar Service Role para bypassar RLS (usuário não autenticado)
+    const supabase = createServiceClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
     
     const { data, error } = await supabase
       .from("orders")
@@ -35,7 +37,7 @@ export async function GET(
       `
       )
       .eq("id", orderId)
-      .gte("created_at", tenMinutesAgo) // Só orders criadas nas últimas 10 minutos
+      // .gte("created_at", tenMinutesAgo) // Só orders criadas nas últimas 10 minutos
       .single();
 
     if (error) {

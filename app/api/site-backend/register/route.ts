@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { createClient as createServiceClient } from "@supabase/supabase-js";
 
 // Schema de validação
 const userRegistrationSchema = z.object({
@@ -17,6 +18,11 @@ const userRegistrationSchema = z.object({
 export async function POST(request: Request) {
   try {
     const supabase = await createClient();
+    // Cliente com Service Role para operações que precisam bypassar RLS
+    const supabaseService = createServiceClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
     const body = await request.json();
 
     // 1. Validar dados de entrada
@@ -91,8 +97,8 @@ export async function POST(request: Request) {
 
     console.log("Profile processado:", profile.id);
 
-    // 5. Criar a Order vinculada ao perfil e plano
-    const { data: order, error: orderError } = await supabase
+    // 5. Criar a Order vinculada ao perfil e plano (usando Service Role para bypassar RLS)
+    const { data: order, error: orderError } = await supabaseService
       .from("orders")
       .insert([
         {
@@ -124,7 +130,7 @@ export async function POST(request: Request) {
       status: "pendente",
     }));
 
-    const { data: createdApplicants, error: applicantsError } = await supabase
+    const { data: createdApplicants, error: applicantsError } = await supabaseService
       .from("applicants")
       .insert(applicantsToCreate)
       .select();

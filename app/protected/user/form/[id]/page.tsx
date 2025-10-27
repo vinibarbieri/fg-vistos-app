@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, ArrowRight, Save, CheckCircle, Circle, Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Save, CheckCircle, Loader2 } from "lucide-react";
 import { FormData, FormProgress, FormAnswer, FormStep } from "@/types/FormT";
 import { FormStepComponent } from "@/components/form/FormStepComponent";
 import { useAuth } from "@/lib/hooks/useAuth";

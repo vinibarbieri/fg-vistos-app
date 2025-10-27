@@ -40,3 +40,21 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  /* Custom scrollbar for step indicators */
+  .step-indicators-scroll::-webkit-scrollbar {
+    height: 6px;
+  }
+  .step-indicators-scroll::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+    border-radius: 10px;
+  }
+  .step-indicators-scroll::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.5);
+    border-radius: 10px;
+  }
+  .step-indicators-scroll::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground));
+  }
+}

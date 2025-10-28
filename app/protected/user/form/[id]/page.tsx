@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, ArrowRight, Save, CheckCircle, Circle, Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Save, CheckCircle, Loader2 } from "lucide-react";
 import { FormData, FormProgress, FormAnswer, FormStep } from "@/types/FormT";
 import { FormStepComponent } from "@/components/form/FormStepComponent";
 import { useAuth } from "@/lib/hooks/useAuth";
@@ -316,28 +316,82 @@ export default function FormPage() {
             )} */}
             
             {/* Step Indicators */}
-            <div className="flex justify-between">
-              {formData.steps.map((step, index) => {
-                const stepProgress = calculatedProgress?.stepProgress?.find(sp => sp.stepIndex === index);
-                const isPreenchido = (stepProgress?.progressPercentage ?? 0) > 0;
-                
-                return (
-                  <button
-                    key={step.section || `step-${index}`}
-                    onClick={() => goToStep(index)}
-                    className={`flex flex-col items-center gap-1 ${
-                      index <= formProgress.currentStep ? 'text-primary' : 'text-muted-foreground'
-                    }`}
-                    disabled={index > formProgress.currentStep && !formProgress.completedSteps.includes(index)}
-                  >
-                    {isPreenchido ? (
-                      <CheckCircle className="h-5 w-5" />
-                    ) : (
-                      <Circle className="h-5 w-5" />
-                    )}
-                  </button>
-                );
-              })}
+            <div className="relative">
+              <div className="flex gap-2 overflow-x-auto pb-4 step-indicators-scroll">
+                {formData.steps.map((step, index) => {
+                  const stepProgress = calculatedProgress?.stepProgress?.find(sp => sp.stepIndex === index);
+                  const isPreenchido = (stepProgress?.progressPercentage ?? 0) > 0;
+                  const isCurrentStep = index === formProgress.currentStep;
+                  const isCompleted = formProgress.completedSteps.includes(index);
+                  
+                  // Remove prefixos e artigos do início do título da etapa
+                  const cleanTitle = (title: string): string => {
+                    if (!title) return title;
+                    
+                    // Remove "Informações sobre"
+                    let cleaned = title.replace(/^Informações sobre\s+/i, '');
+                    // Remove "Informações"
+                    cleaned = cleaned.replace(/^Informações\s+/i, '');
+                    // Remove artigos (o, a, os, as) no início da string
+                    cleaned = cleaned.replace(/^(o|a|os|as|de|da|do|das|dos)\s+/i, '');
+                    // Remove espaços extras no início
+                    cleaned = cleaned.trim();
+                    
+                    return cleaned;
+                  };
+                  const stepTitle = cleanTitle(step.section) || `Etapa ${index + 1}`;
+                  
+                  return (
+                    <button
+                      key={step.section || `step-${index}`}
+                      onClick={() => goToStep(index)}
+                      className={`
+                        flex flex-col items-center gap-2 min-w-[80px] max-w-[150px] px-3 py-2 rounded-lg transition-all cursor-pointer
+                        ${isCurrentStep 
+                          ? 'bg-primary text-primary-foreground shadow-md' 
+                          : isPreenchido
+                            ? 'bg-primary/20 hover:bg-primary/30 text-foreground' 
+                            : 'bg-secondary/5 text-foreground'
+                        }
+                      `}
+                    >
+                      <div className="flex items-center justify-center h-6 w-6 rounded-full border-2 shrink-0 relative"
+                        style={{
+                          backgroundColor: isCompleted || isPreenchido ? 'secondary' : '`transparent`',
+                          borderColor: isCurrentStep ? 'currentColor' : 'currentColor',
+                          opacity: isPreenchido || isCurrentStep ? 1 : 0.5
+                        }}
+                      >
+                        {isCompleted || isPreenchido ? (
+                          <div className="flex items-center justify-center absolute inset-0">
+                            <svg 
+                              className={`h-3 w-3 ${isCurrentStep ? 'text-primary-foreground' : 'text-foreground'}`}
+                              fill="none" 
+                              stroke="currentColor" 
+                              viewBox="0 0 24 24"
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                            </svg>
+                          </div>
+                        ) : (
+                          <span className="text-xs font-medium">{index + 1}</span>
+                        )}
+                      </div>
+                      <span className="text-xs font-medium text-center leading-tight line-clamp-2">
+                        {stepTitle}
+                      </span>
+                      {isPreenchido && !isCompleted && (
+                        <div className="h-1 w-full bg-primary/30 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-primary transition-all"
+                            style={{ width: `${stepProgress?.progressPercentage ?? 0}%` }}
+                          />
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </CardContent>

@@ -1,11 +1,13 @@
-export type FormFieldType = 'text' | 'email' | 'boolean' | 'select' | 'number' | 'date' | 'textarea';
+export type FormFieldType = 'text' | 'email' | 'boolean' | 'radio' | 'select' | 'number' | 'date' | 'textarea' | 'object';
 
 export interface FormField {
   id: string;
   text: string;
   type: FormFieldType;
   options?: string[];
+  fields?: FormField[];
   dependent_fields?: FormField[];
+  option_index?: number;
   required?: boolean;
   placeholder?: string;
 }
